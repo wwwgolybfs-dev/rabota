@@ -1,1 +1,825 @@
-1
+Here is the updated HTML code with fixed word and price lists, enhanced visual style, and a consecutive correct answer counter (streak).
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>学 • Китайский с носителем</title>
+<script src="https://cdn.jsdelivr.net/npm/telegram-web-app@1.0.1/telegram-web-app.js"></script>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg: #F9F7F3;
+  --surface: #FFFFFF;
+  --surface2: #F2EFE9;
+  --border: #E8E2D4;
+  --text: #2C2A27;
+  --muted: #8F8A7E;
+  --accent: #C4452C;
+  --accent-bg: #FDEEEB;
+  --accent-text: #A6321C;
+  --green: #2B7A3E;
+  --green-bg: #E6F4EA;
+  --red: #C23B22;
+  --red-bg: #FEF0EE;
+  --gold: #E6B422;
+  --gold-bg: #FFF8E7;
+  --radius-l: 24px;
+  --radius-m: 16px;
+  --radius-s: 12px;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 6px 14px rgba(0,0,0,0.05);
+  --transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161514;
+    --surface: #23221F;
+    --surface2: #2D2B27;
+    --border: #3D3A34;
+    --text: #F2EFE9;
+    --muted: #A09A8C;
+    --accent: #E0765A;
+    --accent-bg: #3A241E;
+    --accent-text: #F0BCA8;
+    --green: #7FB77E;
+    --green-bg: #1D2E1D;
+    --red: #E67A5E;
+    --red-bg: #3A2620;
+    --gold: #E6B422;
+    --gold-bg: #2F2A1A;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* декоративный фон */
+body::before {
+  content: "⿅ ⓿ 〄";
+  position: fixed;
+  bottom: 20px;
+  right: 10px;
+  font-size: 70px;
+  opacity: 0.03;
+  pointer-events: none;
+  font-family: monospace;
+  white-space: pre;
+  z-index: 0;
+}
+
+.header {
+  padding: 20px 20px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+.logo {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, var(--accent-bg) 0%, #F5E6DE 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 620;
+  letter-spacing: -0.3px;
+  background: linear-gradient(130deg, var(--accent), #e09d7a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.header p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 450;
+}
+
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  padding: 4px 12px;
+  backdrop-filter: blur(8px);
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 40px;
+  transition: var(--transition);
+  background: transparent;
+}
+.tab.active {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.screen {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  padding: 20px 16px 32px;
+  gap: 20px;
+  overflow-y: auto;
+  z-index: 2;
+}
+.screen.active {
+  display: flex;
+}
+
+/* карточки */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  border: 0.5px solid var(--border);
+  padding: 6px 0;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.card-header {
+  padding: 12px 18px 4px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 4px;
+}
+.card-header span {
+  background: var(--accent-bg);
+  padding: 2px 10px;
+  border-radius: 40px;
+  font-size: 12px;
+  color: var(--accent-text);
+}
+.list-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 0.5px solid var(--border);
+  transition: background 0.1s;
+}
+.list-item:last-child {
+  border-bottom: none;
+}
+.word-ru {
+  font-size: 15px;
+  font-weight: 520;
+  letter-spacing: -0.2px;
+}
+.word-zh {
+  font-size: 14px;
+  color: var(--accent-text);
+  background: var(--accent-bg);
+  padding: 3px 10px;
+  border-radius: 40px;
+  font-weight: 480;
+}
+.price-num {
+  font-size: 17px;
+  font-weight: 620;
+  font-feature-settings: "tnum";
+  font-family: monospace;
+  letter-spacing: -0.5px;
+}
+.price-pron {
+  font-size: 14px;
+  background: var(--surface2);
+  padding: 3px 12px;
+  border-radius: 24px;
+  color: var(--text);
+}
+.emoji-deco {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+/* тестовая зона */
+.quiz-header-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-m);
+  padding: 12px 16px;
+  flex: 1;
+  text-align: center;
+  border: 0.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+.streak-fire {
+  background: var(--gold-bg);
+  border-color: var(--gold);
+}
+.streak-fire .stat-number {
+  color: var(--gold);
+}
+
+.quiz-question-card {
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  padding: 28px 18px;
+  text-align: center;
+  border: 0.5px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+.quiz-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.quiz-word {
+  font-size: 34px;
+  font-weight: 650;
+  background: linear-gradient(125deg, var(--text), var(--accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  word-break: break-word;
+}
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.opt-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 60px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.12s;
+  cursor: pointer;
+}
+.opt-btn:active {
+  transform: scale(0.97);
+}
+.opt-btn.correct {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+}
+.opt-btn.wrong {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+}
+.opt-btn:disabled {
+  opacity: 0.8;
+  cursor: default;
+  transform: none;
+}
+.start-btn, .next-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--accent);
+  border: none;
+  border-radius: 60px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.next-btn {
+  background: var(--surface2);
+  color: var(--text);
+  border: 0.5px solid var(--border);
+}
+.start-btn:active, .next-btn:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+.mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mode-btn {
+  flex: 1;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 60px;
+  padding: 12px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--muted);
+}
+.mode-btn.active-mode {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">学</div>
+  <div><h1>Учим китайский</h1><p>слова · произношение · тоны</p></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('words-tab')">📖 Слова</div>
+  <div class="tab" onclick="switchTab('prices-tab')">💰 Ценники</div>
+  <div class="tab" onclick="switchTab('quiz-tab')">🧠 Тест</div>
+</div>
+
+<div id="words-tab" class="screen active">
+  <div class="card">
+    <div class="card-header">
+      <span>🍜</span> Мои слова — коллекция
+    </div>
+    <div id="words-list-container">
+      <!-- динамический список слов -->
+    </div>
+  </div>
+  <div style="font-size: 12px; color: var(--muted); padding: 0 8px; text-align: center;">
+    ✨ Основная лексика для кухни и быта
+  </div>
+</div>
+
+<div id="prices-tab" class="screen">
+  <div class="card">
+    <div class="card-header">
+      <span>🏷️</span> Числа & цены
+    </div>
+    <div id="prices-list-container">
+      <!-- динамический список ценников -->
+    </div>
+  </div>
+  <div style="font-size: 12px; color: var(--muted); padding: 0 8px; text-align: center;">
+    💬 учись называть цену как настоящий хуан (лаобань)
+  </div>
+</div>
+
+<div id="quiz-tab" class="screen">
+  <!-- статистика + серия побед -->
+  <div class="quiz-header-stats">
+    <div class="stat-card"><div class="stat-number" id="s-total">0</div><div class="stat-label">всего ответов</div></div>
+    <div class="stat-card"><div class="stat-number green" id="s-correct">0</div><div class="stat-label">верно</div></div>
+    <div class="stat-card"><div class="stat-number red" id="s-wrong">0</div><div class="stat-label">ошибки</div></div>
+    <div class="stat-card streak-fire" id="streak-card"><div class="stat-number" id="streak-count">0</div><div class="stat-label">🔥 серия побед</div></div>
+  </div>
+
+  <div class="card" style="padding: 8px 14px;">
+    <div class="mode-switch">
+      <div id="mode-words-btn" class="mode-btn active-mode" onclick="setQuizMode('words')">📖 Слова</div>
+      <div id="mode-prices-btn" class="mode-btn" onclick="setQuizMode('prices')">💰 Ценники</div>
+    </div>
+  </div>
+
+  <div id="quiz-idle">
+    <button class="start-btn" onclick="startQuiz()">▶ Начать тренировку</button>
+  </div>
+
+  <div id="quiz-active" style="display:none; flex-direction: column; gap: 20px;">
+    <div class="quiz-question-card">
+      <div class="quiz-label" id="q-label">Как переводится?</div>
+      <div class="quiz-word" id="q-word">—</div>
+    </div>
+    <div class="options-grid" id="q-options"></div>
+    <button class="next-btn" id="next-btn" style="display:none;" onclick="nextQuestion()">➡ Следующий вопрос</button>
+  </div>
+</div>
+
+<script>
+// ------------------------------------------------------------
+//  ЗАКРЕПЛЁННЫЕ ДАННЫЕ (НЕВОЗМОЖНОСТЬ ДОБАВЛЕНИЯ / УДАЛЕНИЯ)
+// ------------------------------------------------------------
+const FIXED_WORDS = {
+  "чайник": "хуу",
+  "хуан (хозяин)": "лаобань",
+  "ложка": "сшаодзы",
+  "вилка": "чхаа",
+  "пароварка": "Вэй Я Гуо",
+  "сковородка (мал.)": "Щьюэ Пин Гуо",
+  "сковородка (бол.)": "Тай Гуо",
+  "сито": "Джэн Лонг",
+  "3 ножа (в комплекте)": "Сан Ба Дао (И Тао)",
+  "черпак": "Сао дзы",
+  "лопатка": "Гуо Тшан",
+  "доска разделочная": "Бан",
+  "термос": "Бэй дз (Ка Фэй Бэй)",
+  "бритва": "Ти Щю Дао",
+  "маленькие щипчики": "Сяо Джы Дья Дао",
+  "щипчики большие": "Да Джы Дья Дао"
+};
+
+// Ценники точно по заданию (уникализация ключей, но с сохранением порядка из списка)
+const rawPriceEntries = [
+  ["2680", "льян тьен льёу бай ба"],
+  ["1280", "и тьен ар бай ба"],
+  ["2980", "льян тьен дьёу бай ба"],
+  ["980", "дьёу бай ба"],
+  ["198", "и бай дьёу шы ба"],
+  ["398", "сан бай дьёу шы ба"],
+  ["298", "льян бай дьёу шы ба"],
+  ["80", "ба шы"],
+  ["100", "и бай"]
+];
+// строим объект уникальный (сохраняем первое вхождение, но согласно списку порядок)
+const FIXED_PRICES = {};
+for (const [num, pron] of rawPriceEntries) {
+  if (!FIXED_PRICES.hasOwnProperty(num)) {
+    FIXED_PRICES[num] = pron;
+  }
+}
+// Дополнительно добавим 398 и 1280 уже есть, но если хотим оставить именно как в визуале - и так отобразятся уникальные
+// (все ключи есть, дубли не меняют смысл)
+
+// ------------------------------------------------------------
+//  ГЛОБАЛЬНОЕ СОСТОЯНИЕ
+// ------------------------------------------------------------
+let quizMode = 'words';     // 'words' или 'prices'
+let stats = {
+  total: 0,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  bestStreak: 0
+};
+let currentQuestion = null;   // { key, correctAnswer }
+let quizActiveFlag = false;
+let waitingForNext = false;
+
+// ------------------------------------------------------------
+//  ЗАГРУЗКА / СОХРАНЕНИЕ СТАТИСТИКИ (только статистика)
+// ------------------------------------------------------------
+function loadStats() {
+  try {
+    const saved = localStorage.getItem('zh_quiz_stats_v2');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      stats.total = parsed.total || 0;
+      stats.correct = parsed.correct || 0;
+      stats.wrong = parsed.wrong || 0;
+      stats.streak = parsed.streak || 0;
+      stats.bestStreak = parsed.bestStreak || 0;
+    }
+  } catch(e) {}
+}
+function saveStats() {
+  try {
+    localStorage.setItem('zh_quiz_stats_v2', JSON.stringify({
+      total: stats.total,
+      correct: stats.correct,
+      wrong: stats.wrong,
+      streak: stats.streak,
+      bestStreak: stats.bestStreak
+    }));
+  } catch(e) {}
+}
+
+// отрисовка статистики на UI
+function renderStatsUI() {
+  document.getElementById('s-total').innerText = stats.total;
+  document.getElementById('s-correct').innerText = stats.correct;
+  document.getElementById('s-wrong').innerText = stats.wrong;
+  const streakEl = document.getElementById('streak-count');
+  if (streakEl) streakEl.innerText = stats.streak;
+  // дополнительно можно показать лучшую серию в подсказке
+  const streakCard = document.getElementById('streak-card');
+  if (streakCard) {
+    let bestSpan = streakCard.querySelector('.best-streak-hint');
+    if (!bestSpan) {
+      bestSpan = document.createElement('div');
+      bestSpan.className = 'stat-label';
+      bestSpan.style.marginTop = '4px';
+      bestSpan.style.fontSize = '10px';
+      streakCard.appendChild(bestSpan);
+    }
+    bestSpan.innerText = `🏆 рекорд: ${stats.bestStreak}`;
+  }
+}
+
+// обновление после ответа
+function updateStatsAfterAnswer(isCorrect) {
+  stats.total++;
+  if (isCorrect) {
+    stats.correct++;
+    stats.streak++;
+    if (stats.streak > stats.bestStreak) {
+      stats.bestStreak = stats.streak;
+    }
+  } else {
+    stats.wrong++;
+    stats.streak = 0;
+  }
+  saveStats();
+  renderStatsUI();
+}
+
+// сброс серии при старте не нужен, просто рендер
+function resetStreakOnNewTest() { } // но оставляем логику
+
+// ------------------------------------------------------------
+//  ОТРИСОВКА ЗАКРЕПЛЁННЫХ СПИСКОВ (без кнопок удаления)
+// ------------------------------------------------------------
+function renderFixedWords() {
+  const container = document.getElementById('words-list-container');
+  if (!container) return;
+  const entries = Object.entries(FIXED_WORDS);
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="empty-state">📭 Словарь пуст, но вы magic</div>';
+    return;
+  }
+  const html = entries.map(([ru, zh]) => `
+    <div class="list-item">
+      <div class="word-ru"><span class="emoji-deco">🍥</span> ${ru}</div>
+      <div class="word-zh">${zh}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html;
+}
+
+function renderFixedPrices() {
+  const container = document.getElementById('prices-list-container');
+  if (!container) return;
+  const entries = Object.entries(FIXED_PRICES);
+  // сортируем по числовому значению для удобства
+  entries.sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="empty-state">🏷️ Нет ценников</div>';
+    return;
+  }
+  const html = entries.map(([num, pron]) => `
+    <div class="list-item">
+      <div class="price-num">💰 ${num} ¥</div>
+      <div class="price-pron">${pron}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html;
+}
+
+// ------------------------------------------------------------
+//  ЛОГИКА ТЕСТА (с учетом закрепленных словарей)
+// ------------------------------------------------------------
+function getCurrentVocabulary() {
+  return quizMode === 'words' ? FIXED_WORDS : FIXED_PRICES;
+}
+
+// генерация вопроса
+function generateQuestion() {
+  const vocab = getCurrentVocabulary();
+  const keys = Object.keys(vocab);
+  if (keys.length < 2) return null;
+  const correctKey = keys[Math.floor(Math.random() * keys.length)];
+  const correctAnswer = vocab[correctKey];
+  
+  // собираем варианты: 1 правильный + 3 случайных неправильных (из тех же значений)
+  const allValues = Object.values(vocab);
+  const otherValues = allValues.filter(v => v !== correctAnswer);
+  if (otherValues.length === 0) return null;
+  
+  const shuffledOthers = [...otherValues].sort(() => Math.random() - 0.5);
+  const wrongOptions = shuffledOthers.slice(0, 3);
+  let options = [correctAnswer, ...wrongOptions];
+  // перемешиваем варианты
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  
+  return {
+    key: correctKey,
+    correctAnswer: correctAnswer,
+    options: options
+  };
+}
+
+let currentQuestionObj = null;
+let answeredLock = false;
+
+function renderQuestion() {
+  if (!currentQuestionObj) return;
+  const q = currentQuestionObj;
+  const labelEl = document.getElementById('q-label');
+  const wordEl = document.getElementById('q-word');
+  
+  if (quizMode === 'words') {
+    labelEl.innerText = '📖 Как переводится это слово?';
+    wordEl.innerText = q.key;
+  } else {
+    labelEl.innerText = '🔢 Как произносится цена?';
+    wordEl.innerText = q.key + ' ¥';
+  }
+  
+  const optionsContainer = document.getElementById('q-options');
+  optionsContainer.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
+    optionsContainer.appendChild(btn);
+  });
+  answeredLock = false;
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function checkAnswer(btn, selected) {
+  if (answeredLock) return;
+  answeredLock = true;
+  const isCorrect = (selected === currentQuestionObj.correctAnswer);
+  
+  // подсветка
+  const allBtns = document.querySelectorAll('#q-options .opt-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.innerText === currentQuestionObj.correctAnswer) {
+      b.classList.add('correct');
+    }
+    if (b === btn && !isCorrect) {
+      b.classList.add('wrong');
+    } else if (b === btn && isCorrect) {
+      b.classList.add('correct');
+    }
+  });
+  
+  // обновляем статистику (серия побед)
+  updateStatsAfterAnswer(isCorrect);
+  
+  // показать кнопку "далее"
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  if (!quizActiveFlag) return;
+  const newQ = generateQuestion();
+  if (!newQ) {
+    // если вдруг словаря недостаточно
+    alert("Недостаточно слов для теста. Добавьте хотя бы 2 элемента (уже есть)");
+    endQuiz();
+    return;
+  }
+  currentQuestionObj = newQ;
+  renderQuestion();
+}
+
+function startQuiz() {
+  const vocab = getCurrentVocabulary();
+  if (Object.keys(vocab).length < 2) {
+    alert("Нужно минимум 2 слова или цены для тестирования!");
+    return;
+  }
+  quizActiveFlag = true;
+  document.getElementById('quiz-idle').style.display = 'none';
+  document.getElementById('quiz-active').style.display = 'flex';
+  
+  // генерируем первый вопрос
+  const firstQ = generateQuestion();
+  if (!firstQ) {
+    endQuiz();
+    return;
+  }
+  currentQuestionObj = firstQ;
+  renderQuestion();
+}
+
+function endQuiz() {
+  quizActiveFlag = false;
+  document.getElementById('quiz-active').style.display = 'none';
+  document.getElementById('quiz-idle').style.display = 'block';
+  currentQuestionObj = null;
+}
+
+function setQuizMode(mode) {
+  quizMode = mode;
+  const wordsBtn = document.getElementById('mode-words-btn');
+  const pricesBtn = document.getElementById('mode-prices-btn');
+  if (mode === 'words') {
+    wordsBtn.classList.add('active-mode');
+    pricesBtn.classList.remove('active-mode');
+  } else {
+    pricesBtn.classList.add('active-mode');
+    wordsBtn.classList.remove('active-mode');
+  }
+  // если тест активен - прервать и вернуться в меню
+  if (quizActiveFlag) {
+    endQuiz();
+  }
+  renderStatsUI(); // перерисовка статистики не меняет данные, но ок
+}
+
+// переключение табов
+function switchTab(tabId) {
+  const tabs = ['words-tab', 'prices-tab', 'quiz-tab'];
+  tabs.forEach(id => {
+    const el = document.getElementById(id);
+    if (id === tabId) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+  const tabButtons = document.querySelectorAll('.tab');
+  tabButtons.forEach((btn, idx) => {
+    if (tabs[idx] === tabId) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  
+  // при переходе на тест просто обновляем статистику
+  if (tabId === 'quiz-tab') {
+    renderStatsUI();
+    // если тест был активен при переключении - лучше сбросить экран
+    if (quizActiveFlag) {
+      endQuiz();
+    }
+    document.getElementById('quiz-idle').style.display = 'block';
+    document.getElementById('quiz-active').style.display = 'none';
+  }
+  if (tabId === 'words-tab') renderFixedWords();
+  if (tabId === 'prices-tab') renderFixedPrices();
+}
+
+// ------------------------------------------------------------
+//  ИНИЦИАЛИЗАЦИЯ
+// ------------------------------------------------------------
+function init() {
+  loadStats();
+  renderFixedWords();
+  renderFixedPrices();
+  renderStatsUI();
+  setQuizMode('words');
+  // фикс: скрыть активный тест при загрузке
+  document.getElementById('quiz-active').style.display = 'none';
+  document.getElementById('quiz-idle').style.display = 'block';
+  quizActiveFlag = false;
+}
+
+init();
+</script>
+</body>
+</html>
+```
