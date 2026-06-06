@@ -6,64 +6,615 @@
 <title>学 · Китайский: тест и карточки</title>
 <script src="https://cdn.jsdelivr.net/npm/telegram-web-app@1.0.1/telegram-web-app.js"></script>
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* темы (светлая по умолчанию) */
 :root {
-  --bg: #F6F4EF;
-  --surface: #FFFFFF;
-  --surface2: #F1EFEA;
-  --border: #E3DDD2;
-  --text: #2C2A27;
-  --muted: #9B968B;
-  --accent: #C5543B;
-  --accent-bg: #FEF0EB;
-  --accent-text: #B33F28;
-  --green: #2E7D5E;
-  --green-bg: #E6F4EF;
-  --red: #CE5A42;
-  --red-bg: #FEF2EF;
-  --gold: #E6B422;
-  --gold-bg: #FFF6E5;
-  --radius-card: 28px;
-  --radius-btn: 44px;
+  --bg: #F6F4EF; --surface: #FFFFFF; --surface2: #F1EFEA; --border: #E3DDD2;
+  --text: #2C2A27; --muted: #9B968B; --accent: #C5543B; --accent-bg: #FEF0EB;
+  --accent-text: #B33F28; --green: #2E7D5E; --green-bg: #E6F4EF; --red: #CE5A42;
+  --red-bg: #FEF2EF; --gold: #E6B422; --gold-bg: #FFF6E5;
+  --radius-card: 28px; --radius-btn: 44px;
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-  --shadow-md: 0 6px 14px rgba(0,0,0,0.05);
-  --transition: 0.2s ease;
+  --shadow-md: 0 6px 14px rgba(0,0,0,0.05); --transition: 0.2s ease;
 }
 
 body.dark {
-  --bg: #151311;
-  --surface: #22211E;
-  --surface2: #2D2B27;
-  --border: #3D3A34;
-  --text: #F0EDE6;
-  --muted: #A39D8F;
-  --accent: #E27B60;
-  --accent-bg: #3E2922;
-  --accent-text: #F0C4B2;
-  --green: #8DBA86;
-  --green-bg: #20312A;
-  --red: #E6896E;
-  --red-bg: #3F2C25;
-  --gold: #E6B422;
-  --gold-bg: #2F2A1A;
+  --bg: #151311; --surface: #22211E; --surface2: #2D2B27; --border: #3D3A34;
+  --text: #F0EDE6; --muted: #A39D8F; --accent: #E27B60; --accent-bg: #3E2922;
+  --accent-text: #F0C4B2; --green: #8DBA86; --green-bg: #20312A; --red: #E6896E;
+  --red-bg: #3F2C25; --gold: #E6B422; --gold-bg: #2F2A1A;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg); color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  max-width: 500px;
-  margin: 0 auto;
+  min-height: 100vh; display: flex; flex-direction: column;
+  max-width: 500px; margin: 0 auto; position: relative;
+  transition: background 0.2s, color 0.1s;
+}
+
+.header {
+  padding: 18px 20px 10px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 0.5px solid var(--border);
+  background: var(--bg); backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 46px; height: 46px;
+  background: linear-gradient(145deg, var(--accent-bg), #F5E2D8);
+  border-radius: 24px; display: flex; align-items: center;
+  justify-content: center; font-size: 24px;
+}
+.header-info h1 {
+  font-size: 18px; font-weight: 640;
+  background: linear-gradient(130deg, var(--accent), #E6A27A);
+  background-clip: text; -webkit-background-clip: text; color: transparent;
+}
+.header-info p { font-size: 11px; color: var(--muted); }
+.header-btns { display: flex; gap: 8px; }
+.theme-toggle, .lang-toggle {
+  background: var(--surface2); border: 0.5px solid var(--border);
+  border-radius: 40px; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; transition: 0.1s;
+  font-weight: 700; color: var(--text);
+}
+
+.tabs {
+  display: flex; background: var(--surface);
+  gap: 6px; padding: 8px 16px; border-bottom: 0.5px solid var(--border);
+}
+.tab {
+  flex: 1; text-align: center; padding: 10px 6px;
+  font-size: 14px; font-weight: 540; color: var(--muted);
+  border-radius: 60px; cursor: pointer; transition: var(--transition);
+}
+.tab.active { background: var(--accent-bg); color: var(--accent-text); font-weight: 590; }
+
+.screen { display: none; flex: 1; flex-direction: column; padding: 20px 16px 32px; gap: 20px; overflow-y: auto; }
+.screen.active { display: flex; }
+
+.card { background: var(--surface); border-radius: var(--radius-card); border: 0.5px solid var(--border); overflow: hidden; }
+.card-header { padding: 16px 20px 8px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; border-bottom: 0.5px solid var(--border); }
+.list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 0.5px solid var(--border); }
+.list-item:last-child { border-bottom: none; }
+.word-ru, .price-num { font-weight: 510; }
+.word-zh, .price-pron { background: var(--surface2); padding: 5px 14px; border-radius: 60px; font-size: 13px; }
+
+/* В китайском режиме: слева иероглифы крупнее, справа пиньинь */
+.zh-mode .list-item { flex-direction: row; align-items: center; gap: 10px; }
+.zh-mode .word-main { font-size: 22px; font-weight: 700; }
+.zh-mode .word-side { font-size: 12px; color: var(--muted); }
+.zh-mode .word-zh { background: none; padding: 0; font-size: 22px; font-weight: 700; }
+.zh-mode .word-ru { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat-card { background: var(--surface); border-radius: 20px; padding: 10px; text-align: center; border: 0.5px solid var(--border); }
+.stat-number { font-size: 24px; font-weight: 700; }
+.streak-animate { animation: streakPop 0.4s cubic-bezier(0.34, 1.2, 0.64, 1); }
+@keyframes streakPop {
+  0% { transform: scale(1); background: var(--gold-bg); }
+  50% { transform: scale(1.2); background: var(--gold); color: #2C2A27; }
+  100% { transform: scale(1); background: var(--surface); }
+}
+
+.flip-container { perspective: 1000px; margin: 10px 0 20px; }
+.flipper {
+  position: relative; width: 100%; height: 280px;
+  transition: transform 0.5s; transform-style: preserve-3d; cursor: pointer;
+}
+.flipper.flipped { transform: rotateY(180deg); }
+.front, .back {
+  position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+  border-radius: 36px; background: var(--surface); border: 0.5px solid var(--border);
+  box-shadow: var(--shadow-md); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 20px;
+}
+.front { transform: rotateY(0deg); }
+.back { transform: rotateY(180deg); background: var(--accent-bg); color: var(--accent-text); }
+.card-front-label, .card-back-label { font-size: 13px; color: var(--muted); margin-bottom: 16px; letter-spacing: 1px; }
+.card-front-text { font-size: 32px; font-weight: 700; word-break: break-word; }
+.card-back-text { font-size: 26px; font-weight: 600; }
+.card-nav { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
+.card-nav button { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 60px; padding: 12px 24px; font-weight: 600; cursor: pointer; color: var(--text); }
+.filter-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
+.filter-btn { flex: 1; background: var(--surface2); border-radius: 40px; padding: 8px; font-size: 13px; font-weight: 500; text-align: center; cursor: pointer; border: 0.5px solid var(--border); color: var(--text); }
+.filter-btn.active-filter { background: var(--accent); color: white; border-color: var(--accent); }
+
+.quiz-question-card { background: var(--surface); border-radius: 36px; padding: 28px 16px; text-align: center; border: 0.5px solid var(--border); }
+.quiz-word { font-size: 32px; font-weight: 700; }
+.options-grid { display: flex; flex-direction: column; gap: 10px; }
+.opt-btn { width: 100%; padding: 14px 18px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 60px; text-align: left; cursor: pointer; color: var(--text); font-size: 15px; }
+.opt-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.opt-btn.wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.start-btn, .next-btn { width: 100%; padding: 15px; border-radius: 60px; font-weight: 600; cursor: pointer; font-size: 16px; }
+.start-btn { background: var(--accent); color: white; border: none; }
+.next-btn { background: var(--surface2); border: 0.5px solid var(--border); color: var(--text); }
+.next-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">学</div>
+    <div class="header-info">
+      <h1 id="header-title">Учим китайский</h1>
+      <p id="header-sub">карточки + тест</p>
+    </div>
+  </div>
+  <div class="header-btns">
+    <div class="lang-toggle" id="langToggle" title="切换语言 / Переключить язык">RU</div>
+    <div class="theme-toggle" id="themeToggle">🌙</div>
+  </div>
+</div>
+
+<div class="tabs" id="tabsContainer">
+  <div class="tab active" data-tab="words-tab" data-ru="📖 Слова" data-zh="📖 词汇">📖 Слова</div>
+  <div class="tab" data-tab="prices-tab" data-ru="💰 Цены" data-zh="💰 价格">💰 Цены</div>
+  <div class="tab" data-tab="quiz-tab" data-ru="🧠 Тест" data-zh="🧠 测试">🧠 Тест</div>
+  <div class="tab" data-tab="cards-tab" data-ru="🃏 Карточки" data-zh="🃏 卡片">🃏 Карточки</div>
+</div>
+
+<div id="words-tab" class="screen active">
+  <div class="card">
+    <div class="card-header" id="words-header">🍜 Лексика</div>
+    <div id="words-list-container"></div>
+  </div>
+</div>
+
+<div id="prices-tab" class="screen">
+  <div class="card">
+    <div class="card-header" id="prices-header">🏷️ Ценники</div>
+    <div id="prices-list-container"></div>
+  </div>
+</div>
+
+<div id="quiz-tab" class="screen">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="s-total">0</div><div id="stat-total-label">всего</div></div>
+    <div class="stat-card"><div class="stat-number" id="s-correct">0</div><div id="stat-correct-label">верно</div></div>
+    <div class="stat-card"><div class="stat-number" id="s-wrong">0</div><div id="stat-wrong-label">ошибки</div></div>
+    <div class="stat-card" id="streakCard">
+      <div class="stat-number" id="streak-count">0</div>
+      <div id="stat-streak-label">🔥 серия</div>
+      <div class="best-streak-hint" id="best-streak-hint"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="mode-switch" style="display:flex; gap:12px; padding:12px">
+      <button id="mode-words-btn" class="filter-btn active-filter" data-ru="📖 Слова" data-zh="📖 词汇">📖 Слова</button>
+      <button id="mode-prices-btn" class="filter-btn" data-ru="💰 Цены" data-zh="💰 价格">💰 Цены</button>
+    </div>
+  </div>
+  <div id="quiz-idle"><button class="start-btn" id="startQuizBtn">▶ Начать тест</button></div>
+  <div id="quiz-active" style="display:none; flex-direction:column; gap:18px;">
+    <div class="quiz-question-card">
+      <div class="quiz-label" id="q-label"></div>
+      <div class="quiz-word" id="q-word"></div>
+    </div>
+    <div class="options-grid" id="q-options"></div>
+    <button class="next-btn" id="nextQuizBtn" disabled>➡ Следующий</button>
+  </div>
+</div>
+
+<div id="cards-tab" class="screen">
+  <div class="filter-buttons" id="cardFilter">
+    <div class="filter-btn active-filter" data-filter="both" data-ru="🎲 Все" data-zh="🎲 全部">🎲 Все</div>
+    <div class="filter-btn" data-filter="words" data-ru="📖 Слова" data-zh="📖 词汇">📖 Слова</div>
+    <div class="filter-btn" data-filter="prices" data-ru="💰 Цены" data-zh="💰 价格">💰 Цены</div>
+  </div>
+  <div class="flip-container">
+    <div class="flipper" id="flipper">
+      <div class="front">
+        <div class="card-front-label" id="card-front-label">🔤 вопрос</div>
+        <div class="card-front-text" id="frontText">—</div>
+      </div>
+      <div class="back">
+        <div class="card-back-label" id="card-back-label">📖 перевод</div>
+        <div class="card-back-text" id="backText">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="card-nav">
+    <button id="prevCardBtn">◀ Назад</button>
+    <button id="nextCardBtn">Вперёд ▶</button>
+  </div>
+  <div style="text-align:center; margin-top:12px; font-size:13px; color:var(--muted);" id="cardCounter">0 / 0</div>
+</div>
+
+<script>
+// ======================== ДАННЫЕ ========================
+
+// Слова: { ru: "...", zh: "汉字", pinyin: "..." }
+const WORDS_DATA = [
+  { ru: "пароварка",            zh: "蒸锅",   pinyin: "Вэй Я Гуо" },
+  { ru: "сковородка (мал.)",    zh: "小平锅",  pinyin: "Щьюэ Пин Гуо" },
+  { ru: "сковородка (бол.)",    zh: "大锅",   pinyin: "Тай Гуо" },
+  { ru: "сито",                 zh: "蒸笼",   pinyin: "Джэн Лонг" },
+  { ru: "3 ножа (в комплекте)", zh: "三把刀（一套）", pinyin: "Сан Ба Дао (И Тао)" },
+  { ru: "черпак",               zh: "勺子",   pinyin: "Сао дзы" },
+  { ru: "лопатка",              zh: "锅铲",   pinyin: "Гуо Тшан" },
+  { ru: "доска разделочная",    zh: "砧板",   pinyin: "Бан" },
+  { ru: "термос",               zh: "杯子（咖啡杯）", pinyin: "Бэй дз (Ка Фэй Бэй)" },
+  { ru: "бритва",               zh: "剃须刀", pinyin: "Ти Щю Дао" },
+  { ru: "маленькие щипчики",    zh: "小指甲刀", pinyin: "Сяо Джы Дья Дао" },
+  { ru: "щипчики большие",      zh: "大指甲刀", pinyin: "Да Джы Дья Дао" }
+];
+
+// Цены: { num: "...", pron: "...", zh: "汉字" }
+const PRICES_DATA = [
+  { num: "2680", pron: "льян тьен льёу бай ба",  zh: "两千六百八" },
+  { num: "1280", pron: "и тьен ар бай ба",        zh: "一千二百八" },
+  { num: "2980", pron: "льян тьен дьёу бай ба",   zh: "两千九百八" },
+  { num: "980",  pron: "дьёу бай ба",              zh: "九百八" },
+  { num: "198",  pron: "и бай дьёу шы ба",         zh: "一百九十八" },
+  { num: "398",  pron: "сан бай дьёу шы ба",       zh: "三百九十八" },
+  { num: "298",  pron: "льян бай дьёу шы ба",      zh: "两百九十八" },
+  { num: "80",   pron: "ба шы",                     zh: "八十" },
+  { num: "100",  pron: "и бай",                     zh: "一百" }
+];
+
+// Для квиза/карточек в старом формате
+function getFixedWords() {
+  const obj = {};
+  WORDS_DATA.forEach(w => { obj[w.ru] = w.pinyin; });
+  return obj;
+}
+function getFixedPrices() {
+  const obj = {};
+  PRICES_DATA.forEach(p => { obj[p.num] = p.pron; });
+  return obj;
+}
+
+// ======================== ЯЗЫК ========================
+let lang = localStorage.getItem('app_lang') || 'ru'; // 'ru' или 'zh'
+
+const I18N = {
+  ru: {
+    headerTitle: "Учим китайский",
+    headerSub: "карточки + тест",
+    wordsHeader: "🍜 Лексика",
+    pricesHeader: "🏷️ Ценники",
+    statTotal: "всего", statCorrect: "верно", statWrong: "ошибки", statStreak: "🔥 серия",
+    bestStreak: "🏆 рекорд:",
+    startBtn: "▶ Начать тест",
+    nextBtn: "➡ Следующий",
+    cardFrontLabel: "🔤 вопрос",
+    cardBackLabel: "📖 перевод",
+    prevCard: "◀ Назад", nextCard: "Вперёд ▶",
+    quizLabelWords: "📖 Как перевести?",
+    quizLabelPrices: "🔢 Произношение цены",
+  },
+  zh: {
+    headerTitle: "学中文",
+    headerSub: "单词卡 + 测试",
+    wordsHeader: "🍜 词汇",
+    pricesHeader: "🏷️ 价格",
+    statTotal: "总计", statCorrect: "正确", statWrong: "错误", statStreak: "🔥 连续",
+    bestStreak: "🏆 记录:",
+    startBtn: "▶ 开始测试",
+    nextBtn: "➡ 下一题",
+    cardFrontLabel: "🔤 问题",
+    cardBackLabel: "📖 翻译",
+    prevCard: "◀ 上一个", nextCard: "下一个 ▶",
+    quizLabelWords: "📖 怎么翻译？",
+    quizLabelPrices: "🔢 价格怎么读？",
+  }
+};
+
+function t(key) { return I18N[lang][key] || I18N['ru'][key]; }
+
+function applyLang() {
+  const isZh = lang === 'zh';
+  document.getElementById('langToggle').innerText = isZh ? '中' : 'RU';
+  document.getElementById('header-title').innerText = t('headerTitle');
+  document.getElementById('header-sub').innerText = t('headerSub');
+  document.getElementById('words-header').innerText = t('wordsHeader');
+  document.getElementById('prices-header').innerText = t('pricesHeader');
+  document.getElementById('stat-total-label').innerText = t('statTotal');
+  document.getElementById('stat-correct-label').innerText = t('statCorrect');
+  document.getElementById('stat-wrong-label').innerText = t('statWrong');
+  document.getElementById('stat-streak-label').innerText = t('statStreak');
+  document.getElementById('startQuizBtn').innerText = t('startBtn');
+  document.getElementById('nextQuizBtn').innerText = t('nextBtn');
+  document.getElementById('card-front-label').innerText = t('cardFrontLabel');
+  document.getElementById('card-back-label').innerText = t('cardBackLabel');
+  document.getElementById('prevCardBtn').innerText = t('prevCard');
+  document.getElementById('nextCardBtn').innerText = t('nextCard');
+
+  // Табы
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.innerText = tab.dataset[lang] || tab.dataset.ru;
+  });
+  // Кнопки фильтров в табе карточек
+  document.querySelectorAll('#cardFilter .filter-btn').forEach(btn => {
+    btn.innerText = btn.dataset[lang] || btn.dataset.ru;
+  });
+  // Кнопки режима квиза
+  document.getElementById('mode-words-btn').innerText = document.getElementById('mode-words-btn').dataset[lang] || document.getElementById('mode-words-btn').dataset.ru;
+  document.getElementById('mode-prices-btn').innerText = document.getElementById('mode-prices-btn').dataset[lang] || document.getElementById('mode-prices-btn').dataset.ru;
+
+  // Перерисовать списки
+  renderFixedWords();
+  renderFixedPrices();
+
+  // Обновить карточки
+  allCards = buildAllCards();
+  const activeFilter = document.querySelector('#cardFilter .filter-btn.active-filter');
+  updateFilteredCards(activeFilter ? activeFilter.dataset.filter : 'both');
+
+  updateStatsUI();
+}
+
+function toggleLang() {
+  lang = lang === 'ru' ? 'zh' : 'ru';
+  localStorage.setItem('app_lang', lang);
+  applyLang();
+}
+document.getElementById('langToggle').onclick = toggleLang;
+
+// ======================== ТЕМА ========================
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme() {
+  const isDark = currentTheme === 'dark' || (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  if (currentTheme === 'light') currentTheme = 'dark';
+  else if (currentTheme === 'dark') currentTheme = 'system';
+  else currentTheme = 'light';
+  localStorage.setItem('theme', currentTheme);
+  applyTheme();
+}
+document.getElementById('themeToggle').onclick = toggleTheme;
+applyTheme();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (currentTheme === 'system') applyTheme(); });
+
+// ======================== ЗВУКИ ========================
+let audioCtx = null;
+function playSound(type) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.value = 0.15;
+    if (type === 'correct') { osc.frequency.value = 880; gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4); }
+    else { osc.frequency.value = 440; gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5); }
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) { console.warn('audio error'); }
+}
+
+// ======================== СТАТИСТИКА ========================
+let stats = { total: 0, correct: 0, wrong: 0, streak: 0, bestStreak: 0 };
+function loadStats() { try { const s = localStorage.getItem('zh_stats_v4'); if(s) Object.assign(stats, JSON.parse(s)); } catch(e){} }
+function saveStats() { localStorage.setItem('zh_stats_v4', JSON.stringify(stats)); }
+function updateStatsUI() {
+  document.getElementById('s-total').innerText = stats.total;
+  document.getElementById('s-correct').innerText = stats.correct;
+  document.getElementById('s-wrong').innerText = stats.wrong;
+  document.getElementById('streak-count').innerText = stats.streak;
+  document.getElementById('best-streak-hint').innerText = `${t('bestStreak')} ${stats.bestStreak}`;
+  if (stats.streak > 0 && (stats.streak % 3 === 0 || stats.streak === stats.bestStreak)) {
+    const streakCard = document.getElementById('streakCard');
+    streakCard.classList.add('streak-animate');
+    setTimeout(() => streakCard.classList.remove('streak-animate'), 500);
+  }
+}
+function updateStatsAfterAnswer(isCorrect) {
+  stats.total++;
+  if (isCorrect) { stats.correct++; stats.streak++; if(stats.streak>stats.bestStreak) stats.bestStreak=stats.streak; playSound('correct'); }
+  else { stats.wrong++; stats.streak=0; playSound('wrong'); }
+  saveStats(); updateStatsUI();
+}
+
+// ======================== РЕНДЕР СПИСКОВ ========================
+function renderFixedWords() {
+  const c = document.getElementById('words-list-container');
+  if (!c) return;
+  if (lang === 'zh') {
+    // Китайский режим: слева иероглиф, в центре пиньинь, справа русский
+    c.innerHTML = WORDS_DATA.map(w => `
+      <div class="list-item">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+          <span style="font-size:22px;font-weight:700;">${w.zh}</span>
+          <span style="font-size:12px;color:var(--muted)">${w.ru}</span>
+        </div>
+        <div style="background:var(--surface2);padding:5px 14px;border-radius:60px;font-size:13px">${w.pinyin}</div>
+      </div>`).join('');
+  } else {
+    c.innerHTML = WORDS_DATA.map(w => `
+      <div class="list-item">
+        <div class="word-ru">${w.ru}</div>
+        <div class="word-zh">${w.pinyin}</div>
+      </div>`).join('');
+  }
+}
+
+function renderFixedPrices() {
+  const c = document.getElementById('prices-list-container');
+  if (!c) return;
+  const sorted = [...PRICES_DATA].sort((a,b) => parseInt(a.num) - parseInt(b.num));
+  if (lang === 'zh') {
+    c.innerHTML = sorted.map(p => `
+      <div class="list-item">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+          <span style="font-size:22px;font-weight:700;">${p.zh}</span>
+          <span style="font-size:12px;color:var(--muted)">${p.num} ¥</span>
+        </div>
+        <div style="background:var(--surface2);padding:5px 14px;border-radius:60px;font-size:13px">${p.pron}</div>
+      </div>`).join('');
+  } else {
+    c.innerHTML = sorted.map(p => `
+      <div class="list-item">
+        <div class="price-num">${p.num} ¥</div>
+        <div class="price-pron">${p.pron}</div>
+      </div>`).join('');
+  }
+}
+
+// ======================== ТЕСТ ========================
+let quizMode = 'words', quizActive = false, currentQuestion = null, answerLock = false;
+let nextBtn = document.getElementById('nextQuizBtn');
+
+function getVocab() { return quizMode === 'words' ? getFixedWords() : getFixedPrices(); }
+
+function generateQuestion() {
+  const vocab = getVocab(), keys = Object.keys(vocab);
+  if (keys.length < 2) return null;
+  const correctKey = keys[Math.floor(Math.random() * keys.length)];
+  const correctAns = vocab[correctKey];
+  const others = Object.values(vocab).filter(v => v !== correctAns);
+  if (others.length === 0) return null;
+  const wrongOpts = others.sort(() => Math.random() - 0.5).slice(0, 3);
+  let opts = [correctAns, ...wrongOpts];
+  for (let i = opts.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+  // В китайском режиме для слов: вопрос — иероглиф, вариант — пиньинь
+  // Уже реализовано через getFixedWords() → {ru: pinyin}
+  // Дополнительно покажем иероглиф если zh
+  let displayKey = correctKey;
+  if (lang === 'zh' && quizMode === 'words') {
+    const found = WORDS_DATA.find(w => w.ru === correctKey);
+    if (found) displayKey = found.zh;
+  } else if (lang === 'zh' && quizMode === 'prices') {
+    const found = PRICES_DATA.find(p => p.num === correctKey);
+    if (found) displayKey = found.zh;
+  }
+  return { key: correctKey, displayKey, answer: correctAns, options: opts };
+}
+
+function renderQuizUI() {
+  if (!currentQuestion) return;
+  document.getElementById('q-label').innerText = quizMode === 'words' ? t('quizLabelWords') : t('quizLabelPrices');
+  document.getElementById('q-word').innerText = lang === 'zh' ? currentQuestion.displayKey : (quizMode === 'prices' ? `${currentQuestion.key} ¥` : currentQuestion.key);
+  const container = document.getElementById('q-options');
+  container.innerHTML = '';
+  currentQuestion.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn'; btn.innerText = opt;
+    btn.onclick = () => handleQuizAnswer(btn, opt);
+    container.appendChild(btn);
+  });
+  answerLock = false; nextBtn.disabled = true;
+}
+
+function handleQuizAnswer(btn, selected) {
+  if (answerLock) return;
+  const isCorrect = (selected === currentQuestion.answer);
+  answerLock = true;
+  const allBtns = document.querySelectorAll('#q-options .opt-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.innerText === currentQuestion.answer) b.classList.add('correct');
+    if (b === btn && !isCorrect) b.classList.add('wrong');
+    else if (b === btn && isCorrect) b.classList.add('correct');
+  });
+  updateStatsAfterAnswer(isCorrect);
+  nextBtn.disabled = false;
+}
+
+function nextQuestion() { if (!quizActive || nextBtn.disabled) return; const newQ = generateQuestion(); if (!newQ) return; currentQuestion = newQ; renderQuizUI(); }
+function startQuiz() { if (Object.keys(getVocab()).length < 2) { alert(lang==='zh'?'最少需要2个单词':'Нужно минимум 2 слова'); return; } const q = generateQuestion(); if (!q) return; quizActive=true; currentQuestion=q; document.getElementById('quiz-idle').style.display='none'; document.getElementById('quiz-active').style.display='flex'; renderQuizUI(); }
+function endQuiz() { quizActive=false; document.getElementById('quiz-active').style.display='none'; document.getElementById('quiz-idle').style.display='block'; }
+function setQuizMode(mode) { quizMode=mode; document.getElementById('mode-words-btn').classList.toggle('active-filter', mode==='words'); document.getElementById('mode-prices-btn').classList.toggle('active-filter', mode==='prices'); if(quizActive) endQuiz(); }
+
+document.getElementById('mode-words-btn').onclick = () => setQuizMode('words');
+document.getElementById('mode-prices-btn').onclick = () => setQuizMode('prices');
+document.getElementById('startQuizBtn').onclick = startQuiz;
+nextBtn.onclick = nextQuestion;
+
+// ======================== КАРТОЧКИ ========================
+let allCards = [], filteredCards = [], currentCardIndex = 0, isFlipped = false;
+
+function buildAllCards() {
+  if (lang === 'zh') {
+    // Лицо: иероглиф, оборот: пиньинь
+    const wordsCards = WORDS_DATA.map(w => ({ type: 'word', front: w.zh, back: w.pinyin, hint: w.ru }));
+    const priceCards = PRICES_DATA.map(p => ({ type: 'price', front: p.zh, back: p.pron, hint: `${p.num} ¥` }));
+    return [...wordsCards, ...priceCards];
+  } else {
+    const wordsCards = WORDS_DATA.map(w => ({ type: 'word', front: w.ru, back: w.pinyin }));
+    const priceCards = PRICES_DATA.map(p => ({ type: 'price', front: `${p.num} ¥`, back: p.pron }));
+    return [...wordsCards, ...priceCards];
+  }
+}
+
+function updateFilteredCards(filter) {
+  if (filter === 'words') filteredCards = allCards.filter(c => c.type === 'word');
+  else if (filter === 'prices') filteredCards = allCards.filter(c => c.type === 'price');
+  else filteredCards = [...allCards];
+  if (filteredCards.length === 0) { document.getElementById('frontText').innerText = '—'; document.getElementById('backText').innerText = '—'; document.getElementById('cardCounter').innerText = '0 / 0'; return; }
+  if (currentCardIndex >= filteredCards.length) currentCardIndex = filteredCards.length - 1;
+  if (currentCardIndex < 0 && filteredCards.length) currentCardIndex = 0;
+  renderCurrentCard();
+}
+
+function renderCurrentCard() {
+  if (!filteredCards.length) return;
+  const card = filteredCards[currentCardIndex];
+  document.getElementById('frontText').innerText = card.front;
+  // оборот + hint если zh
+  if (lang === 'zh' && card.hint) {
+    document.getElementById('backText').innerHTML = `<span style="font-size:26px;font-weight:600">${card.back}</span><br><span style="font-size:13px;color:var(--muted);margin-top:8px;display:block">${card.hint}</span>`;
+  } else {
+    document.getElementById('backText').innerText = card.back;
+  }
+  document.getElementById('cardCounter').innerText = `${currentCardIndex+1} / ${filteredCards.length}`;
+  if (isFlipped) { document.getElementById('flipper').classList.remove('flipped'); isFlipped = false; }
+}
+
+function nextCard() { if (filteredCards.length && currentCardIndex+1 < filteredCards.length) { currentCardIndex++; renderCurrentCard(); } }
+function prevCard() { if (filteredCards.length && currentCardIndex-1 >= 0) { currentCardIndex--; renderCurrentCard(); } }
+function flipCard() { document.getElementById('flipper').classList.toggle('flipped'); isFlipped = !isFlipped; }
+
+document.getElementById('nextCardBtn').onclick = nextCard;
+document.getElementById('prevCardBtn').onclick = prevCard;
+document.getElementById('flipper').onclick = flipCard;
+
+document.querySelectorAll('#cardFilter .filter-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#cardFilter .filter-btn').forEach(b => b.classList.remove('active-filter'));
+    btn.classList.add('active-filter');
+    updateFilteredCards(btn.dataset.filter);
+  };
+});
+
+// ======================== СВАЙПЫ ========================
+let touchStartX = 0, touchEndX = 0;
+document.body.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+document.body.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchEndX - touchStartX;
+  if (Math.abs(diff) < 50) return;
+  const tabs = ['words-tab', 'prices-tab', 'quiz-tab', 'cards-tab'];
+  let currentIdx = tabs.findIndex(id => document.getElementById(id).classList.contains('active'));
+  if (diff < 0 && currentIdx < tabs.length-1) switchTab(tabs[currentIdx+1]);
+  else if (diff > 0 && currentIdx > 0) switchTab(tabs[currentIdx-1]);
+});
+
+// ======================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ========================
+function switchTab(tabId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+  if (tabId === 'words-tab') renderFixedWords();
+  if (tabId === 'prices-tab') renderFixedPrices();
+  if (tabId === 'quiz-tab') { updateStatsUI(); if(quizActive) endQuiz(); document.getElementById('quiz-idle').style.display='block'; document.getElementById('quiz-active').style.display='none'; }
+  if (tabId === 'cards-tab') { allCards = buildAllCards(); const af = document.querySelector('#cardFilter .filter-btn.active-filter'); updateFilteredCards(af ? af.dataset.filter : 'both'); }
+}
+document.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.tab); });
+
+// ======================== ИНИЦИАЛИЗАЦИЯ ========================
+loadStats();
+applyLang(); // применяет язык и рисует всё
+</script>
+</body>
+</html>  margin: 0 auto;
   position: relative;
   transition: background 0.2s, color 0.1s;
 }
