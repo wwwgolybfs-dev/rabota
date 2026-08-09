@@ -15,6 +15,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5/500.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5/700.css" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ============ PETZKER 2.0 · Liquid Glass × Telegram × Gold ============ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -161,7 +162,7 @@ img{display:block}
 .av-i{font-weight:800;color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.25);font-size:.42em;line-height:1}
 .av-p{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .hat{position:absolute;left:50%;top:-24%;transform:translateX(-50%) rotate(-7deg);width:108%;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));z-index:2}
-.hat svg{width:100%;height:auto;display:block}
+.hat svg,.hat img{width:100%;height:auto;display:block;object-fit:contain}
 .avstack{display:flex}
 .avstack .av{margin-left:-8px;border:2px solid var(--bg)}
 .avstack .av:first-child{margin-left:0}
@@ -513,22 +514,32 @@ textarea.f-in{min-height:70px;resize:vertical}
    Ниже — КОНФИГ: вставьте существующие значения без изменений логики.
 ===================================================================== */
 const CONFIG = {
-  SUPABASE_URL: '',        // ← существующий Supabase URL (без изменений)
-  SUPABASE_ANON_KEY: '',   // ← существующий anon key
-  MAX_SPOTS: 2,            // лимит мест на дату (бизнес-правило)
-  BET_FEE_RATE: 0.05,      // комиссия (формула сохранена)
-  FEE_RECIPIENTS: ['u-anatoly','u-vnvv'], // комиссия Анатолия и vnvv (сохранена)
-  CASINO_URL: 'Casino/casino.html', // существующий URL казино
-  HATS_BASE: ''            // существующий GitHub URL шляп
+  // EXISTING PETZKER SUPABASE PROJECT — do not change
+  SUPABASE_URL: 'https://heubrattlnikielnfheg.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhldWJyYXR0bG5pa2llbG5maGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NzYyMjcsImV4cCI6MjEwMDU1MjIyN30._lRs77YnsILFN_Ru4uR2wDWQFtAlazZh8UaaKa7fsnM',
+  MAX_SPOTS: 2,
+  ANATOLY_ID: '438081341',
+  VNVV_ID: '665412797',
+  ANATOLY_COMMISSION: 0.06,
+  VNVV_COMMISSION: 0.04,
+  CASINO_URL: 'https://wwwgolybfs-dev.github.io/Casino/casino.html',
+  HATS_BASE: 'https://raw.githubusercontent.com/wwwgolybfs-dev/Casino/main/hats/'
 };
-const isAdmin = u => !!u && u.name === 'Анатолий'; // определение администратора сохранено
 
-const GAMES = [ // URL и параметры uid/name/theme — сохранены
-  {id:'miner', icon:'💣', name:'Минёр', desc:'Классика жанра: открывай клетки и не подрывись.', tag:'Классика', url:'Games/miner.html', feat:true},
-  {id:'dice',  icon:'🎲', name:'Кубики Удача', desc:'Два кубика, немного удачи — всё или ничего.', url:'Games/dice.html'},
-  {id:'doodle',icon:'🦘', name:'Дудл Прыжки', desc:'Прыгай по платформам и собирай очки.', url:'Games/doodle.html'},
-  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'Спокойная прогулка и исследование мира.', tag:'3D мир', url:'Games/walker3d.html'},
-  {id:'portal3',icon:'🍰', name:'Portal 3', desc:'Внешний портал прямо в кондитерскую.', tag:'Внешняя', url:'Games/portal3.html', external:true},
+const HAT_FILES = {
+  chef:'hat_chef.svg', cowboy:'hat_cowboy.svg', crown:'hat_crown.svg', detective:'hat_detective.svg',
+  party:'hat_party.svg', pirate:'hat_pirate.svg', tophat:'hat_tophat.svg', viking:'hat_viking.svg', wizard:'hat_wizard.svg'
+};
+function hatUrl(h){ if(!h) return null; return CONFIG.HATS_BASE + (HAT_FILES[h] || ('hat_'+h+'.svg')); }
+function isAdmin(u){ return !!u && String(u.id) === String(CONFIG.ANATOLY_ID); }
+function isCommissionAdmin(u){ return !!u && (String(u.id)===String(CONFIG.ANATOLY_ID) || String(u.id)===String(CONFIG.VNVV_ID)); }
+
+const GAMES = [
+  {id:'miner', icon:'💣', name:'Минёр', desc:'Классика жанра: открывай клетки и не подорвись.', tag:'Классика', url:'https://wwwgolybfs-dev.github.io/global_obnova/minesweeper.html', feat:true},
+  {id:'dice', icon:'🎲', name:'Кубики Удача', desc:'Два кубика, немного удачи — всё или ничего.', url:'https://wwwgolybfs-dev.github.io/global_obnova/dice.html'},
+  {id:'doodle',icon:'🦘', name:'Дудл Прыжки', desc:'Прыгай по платформам и собирай очки.', url:'https://wwwgolybfs-dev.github.io/global_obnova/doodle.html'},
+  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'Домик собак — игровой слот.', tag:'3D / game', url:'https://wwwgolybfs-dev.github.io/dog_hause/index.html', external:true},
+  {id:'portal3',icon:'🍰', name:'Portal 3', desc:'Внешняя игра.', tag:'Внешняя', url:'https://p2.slqnt.dev/', external:true},
   {id:'soon1', icon:'🎯', name:'Скоро…', desc:'В разработке', soon:true},
   {id:'soon2', icon:'✨', name:'В разработке…', desc:'Скоро', soon:true}
 ];
@@ -553,29 +564,19 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 function haptic(t){ try{ if(tg&&tg.HapticFeedback){ if(t==='light') tg.HapticFeedback.impactOccurred('light'); else if(t==='success') tg.HapticFeedback.notificationOccurred('success'); else if(t==='error') tg.HapticFeedback.notificationOccurred('error'); } }catch(e){} }
 
 /* ---------- user ---------- */
-const AV = {
-  anatoly:'https://image.qwenlm.ai/public_source/4ce1c27f-b85b-41ea-b862-d8fcfe9cd6a3/17392c242-9f7b-4703-9a6c-15b39ef40fe3.png',
-  maria:'https://image.qwenlm.ai/public_source/4ce1c27f-b85b-41ea-b862-d8fcfe9cd6a3/1e2d409c2-8570-4a92-abd8-ca8f6dd41470.png',
-  sergey:'https://image.qwenlm.ai/public_source/4ce1c27f-b85b-41ea-b862-d8fcfe9cd6a3/1387b98fa-f42e-4bf2-a1b5-7bfb40ad5a54.png',
-  olga:'https://image.qwenlm.ai/public_source/4ce1c27f-b85b-41ea-b862-d8fcfe9cd6a3/1b4a2a4e2-d82a-40ba-968b-e93c197f215a.png',
-  dima:'https://image.qwenlm.ai/public_source/4ce1c27f-b85b-41ea-b862-d8fcfe9cd6a3/1108f9d95-643a-4b88-9173-f1a4c1e4042b.png'
-};
 let USER=null;
 (function(){
   let tu=null; try{ tu = tg && tg.initDataUnsafe && tg.initDataUnsafe.user; }catch(e){}
-  if(tu && tu.id){ USER={id:'tg-'+tu.id, name:((tu.first_name||'')+(tu.last_name?' '+tu.last_name:'')).trim()||'Гость', photo:tu.photo_url||null, tgId:tu.id, demo:false}; }
-  else { USER={id:'u-anatoly', name:'Анатолий', photo:AV.anatoly, tgId:null, demo:true}; } // демо-стенд
+  if(tu && tu.id){
+    USER={id:String(tu.id), name:((tu.first_name||'')+(tu.last_name?' '+tu.last_name:'')).trim()||tu.username||('User '+tu.id), photo:tu.photo_url||null, tgId:String(tu.id), username:tu.username||null, demo:false};
+  } else {
+    USER={id:'demo', name:'Демо', photo:null, tgId:null, username:null, demo:true};
+  }
 })();
-const DEMO = !tg && !CONFIG.SUPABASE_URL;
+const DEMO = !tg;
 
-/* ---------- hats (идентификаторы/URL сохранены; визуал можно менять) ---------- */
-const HATS = {
-  crown:'<svg viewBox="0 0 100 62"><path d="M8 52 L4 18 L28 34 L50 6 L72 34 L96 18 L92 52 Z" fill="#e9c25c" stroke="#8a611a" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="7" r="5" fill="#f6e2a5"/><circle cx="6" cy="17" r="4" fill="#f6e2a5"/><circle cx="94" cy="17" r="4" fill="#f6e2a5"/></svg>',
-  cap:'<svg viewBox="0 0 100 58"><path d="M10 50 C10 18 90 18 90 50 Z" fill="#4a6fa5"/><rect x="7" y="44" width="86" height="12" rx="6" fill="#37547e"/><circle cx="50" cy="12" r="7" fill="#dbe6f5"/></svg>',
-  wizard:'<svg viewBox="0 0 100 74"><path d="M50 2 L78 60 Q50 72 22 60 Z" fill="#7b5ea7"/><path d="M18 60 Q50 76 82 60 L86 67 Q50 84 14 67 Z" fill="#644890"/><circle cx="44" cy="30" r="3.4" fill="#f3e6ff"/><circle cx="58" cy="46" r="2.8" fill="#f3e6ff"/></svg>',
-  flower:'<svg viewBox="0 0 70 46"><g transform="translate(35,26)"><circle r="6.5" fill="#f0b429"/><circle cx="0" cy="-11" r="6" fill="#e86a8a"/><circle cx="10" cy="-4" r="6" fill="#e86a8a"/><circle cx="7" cy="8" r="6" fill="#e86a8a"/><circle cx="-7" cy="8" r="6" fill="#e86a8a"/><circle cx="-10" cy="-4" r="6" fill="#e86a8a"/></g></svg>'
-};
-function hatHTML(h){ return HATS[h] ? '<span class="hat">'+HATS[h]+'</span>' : ''; }
+/* ---------- hats (GitHub/Casino, существующая система) ---------- */
+function hatHTML(h){ const url=hatUrl(h); return url ? '<span class="hat"><img src="'+url+'" alt=""></span>' : ''; }
 
 /* ---------- avatars ---------- */
 const GRADS=[['#d9ab3f','#8a611a'],['#8fa8c8','#4d6a94'],['#cf93a4','#8d5568'],['#9dbd95','#587f52'],['#b3a0d6','#6f5a99'],['#d3a58b','#8f5c42']];
@@ -587,55 +588,106 @@ function avatarHTML(u,size,withHat){
   const img=u.photo?'<img class="av-p" src="'+u.photo+'" alt="" onerror="this.style.display=\'none\'">':'';
   return '<span class="av" style="width:'+size+'px;height:'+size+'px;font-size:'+size+'px;background:linear-gradient(135deg,'+g[0]+','+g[1]+')"><span class="av-i">'+initials(u.name)+'</span>'+img+(withHat?hatHTML(u.hat):'')+'</span>';
 }
-function mavHTML(u){ const st=u&&u.photo?'background-image:url('+u.photo+')':'background:'+GRADS[hash(u.name)%GRADS.length][0]; return '<span class="mav" style="'+st+'"></span>'; }
+function mavHTML(u){ return avatarHTML(u,30,false); }
 
-/* ---------- demo store (fallback, когда Supabase не подключён; при подключённом Supabase используются существующие запросы) ---------- */
-const LS='petzker_demo_v1', SEED_V=4;
-let store=null, sb=null;
-function seed(){
-  const now=Date.now(), t=new Date();
-  const d=off=>{const x=new Date(t);x.setDate(x.getDate()+off);return iso(x);};
-  const at=(off,h,m)=>{const x=new Date(t);x.setDate(x.getDate()+off);x.setHours(h,m,0,0);return x.getTime();};
-  return { v:SEED_V,
-    users:[
-      {id:'u-anatoly',name:'Анатолий',photo:AV.anatoly,hat:'crown',balance:12450,wins:27,betsCount:43},
-      {id:'u-vnvv',name:'vnvv',photo:null,hat:'cap',balance:11890,wins:24,betsCount:51},
-      {id:'u-maria',name:'Мария',photo:AV.maria,hat:'flower',balance:9840,wins:19,betsCount:30},
-      {id:'u-sergey',name:'Сергей',photo:AV.sergey,hat:null,balance:9120,wins:17,betsCount:26},
-      {id:'u-olga',name:'Ольга',photo:AV.olga,hat:'wizard',balance:8970,wins:15,betsCount:22},
-      {id:'u-dima',name:'Дмитрий',photo:AV.dima,hat:null,balance:7310,wins:11,betsCount:18}
-    ],
-    weekends:[ {date:d(2),userId:'u-maria'}, {date:d(5),userId:'u-sergey'}, {date:d(5),userId:'u-olga'}, {date:d(9),userId:'u-anatoly'} ],
-    diary:[
-      {id:'d1',text:'Пятница близко. Держимся.',ts:at(0,12,40)},
-      {id:'d2',text:'Кто-то снова оставил торт на кухне. Это диверсия против диеты.',ts:at(0,9,5)},
-      {id:'d3',text:'Сегодня опять опоздал автобус…',ts:at(-1,17,42)},
-      {id:'d4',text:'Новая кофемашина шипит как дракон, но кофе отличный.',ts:at(-3,11,18)}
-    ],
-    events:[
-      {id:'ev1',title:'Кто закроет план недели до пятницы?',desc:'Следим всем отделом. Ставки до вечера пятницы.',o1:'План будет закрыт',o2:'Не успеют',p1:4500,p2:2300,n1:9,n2:6,closes:now+3*3600e3+42*60e3+18e3,status:'active'},
-      {id:'ev2',title:'Дудл Прыжки: рекорд недели выше 5 000?',desc:'По таблице рекордов игры.',o1:'Да, выше',o2:'Нет',p1:1200,p2:2900,n1:4,n2:8,closes:now+26*3600e3,status:'active'},
-      {id:'ev3',title:'Минёр: Анатолий пройдёт поле без подрыва?',desc:'Классика. Одно поле, одна жизнь.',o1:'Пройдёт',o2:'Подорвётся',p1:3800,p2:2600,n1:12,n2:9,closes:now-26*3600e3,status:'finished',winner:1}
-    ],
-    bets:[
-      {id:'b1',evId:'ev1',userId:'u-anatoly',out:1,amount:200,status:'active'},
-      {id:'b2',evId:'ev3',userId:'u-anatoly',out:1,amount:300,status:'win',payout:540}
-    ]
-  };
+/* ---------- Supabase data layer: existing DB only, no schema changes ---------- */
+let store={v:1,users:[],weekends:[],diary:[],events:[],bets:[]}, sb=null;
+if(window.supabase && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY){
+  try{ sb=window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); }catch(e){ console.error('Supabase init',e); }
 }
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(store)); }catch(e){} }
-function loadStore(){
-  try{ store=JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ store=null; }
-  if(!store || store.v!==SEED_V){ store=seed(); save(); }
-  if(!getUser(USER.id)){ store.users.push({id:USER.id,name:USER.name,photo:USER.photo,hat:null,balance:1000,wins:0,betsCount:0}); save(); }
-}
-function getUser(id){ return store.users.find(u=>u.id===id) || null; }
-function me(){ return getUser(USER.id) || {id:USER.id,name:USER.name,balance:0,wins:0,betsCount:0}; }
+function save(){ if(DEMO){ try{ localStorage.setItem('petzker_demo_v2',JSON.stringify(store)); }catch(e){} } }
+function getUser(id){ return store.users.find(u=>String(u.id)===String(id)) || null; }
+function me(){ return getUser(USER.id) || {id:USER.id,name:USER.name,photo:USER.photo,hat:null,balance:0,wins:0,betsCount:0}; }
 function signupsFor(key){ return store.weekends.filter(w=>w.date===key); }
 
-/* ---------- Supabase (защищено: существующие запросы подставляются без изменений) ---------- */
-if(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase){
-  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+function normalizeUser(row){ return {id:String(row.telegram_user_id),name:row.name||('User '+row.telegram_user_id),photo:row.photo_url||null,hat:null,balance:Number(row.total_score||0),wins:0,betsCount:0}; }
+async function ensureCurrentPlayer(){
+  if(!sb || DEMO) return;
+  const {data,error}=await sb.from('player_ratings').select('telegram_user_id,name,total_score,games_played,photo_url').eq('telegram_user_id',USER.id).maybeSingle();
+  if(error) throw error;
+  if(!data){
+    const row={telegram_user_id:USER.id,name:USER.name,total_score:10000,games_played:0,updated_at:new Date().toISOString()};
+    if(USER.photo) row.photo_url=USER.photo;
+    const {data:created,error:ce}=await sb.from('player_ratings').insert([row]).select().single();
+    if(ce) throw ce;
+    store.users=[normalizeUser(created)];
+  }else{
+    const patch={name:USER.name,updated_at:new Date().toISOString()}; if(USER.photo) patch.photo_url=USER.photo;
+    await sb.from('player_ratings').update(patch).eq('telegram_user_id',USER.id);
+  }
+}
+async function loadStoreFromSupabase(){
+  if(!sb || DEMO){
+    try{ store=JSON.parse(localStorage.getItem('petzker_demo_v2')||'null') || {v:1,users:[{id:'demo',name:'Демо',photo:null,hat:null,balance:10000,wins:0,betsCount:0}],weekends:[],diary:[],events:[],bets:[]}; }catch(e){}
+    return;
+  }
+  await ensureCurrentPlayer();
+  const [ratingsR,hatsR,vacR,diaryR,eventsR,betsR]=await Promise.all([
+    sb.from('player_ratings').select('telegram_user_id,name,total_score,games_played,photo_url').order('total_score',{ascending:false}),
+    sb.from('player_active_hat').select('telegram_user_id,hat_id'),
+    sb.from('vacations').select('id,day,name,telegram_user_id').order('created_at',{ascending:true}),
+    sb.from('diary_entries').select('id,text,created_at').order('created_at',{ascending:false}).limit(100),
+    sb.from('bet_events').select('*').order('created_at',{ascending:false}),
+    sb.from('bet_placements').select('*').order('created_at',{ascending:false}).limit(500)
+  ]);
+  for(const r of [ratingsR,hatsR,vacR,diaryR,eventsR,betsR]) if(r.error) throw r.error;
+  const hats={}; (hatsR.data||[]).forEach(h=>hats[String(h.telegram_user_id)]=h.hat_id);
+  const users=(ratingsR.data||[]).map(normalizeUser);
+  users.forEach(u=>u.hat=hats[u.id]||null);
+  const byId={}; users.forEach(u=>byId[u.id]=u);
+  const bets=(betsR.data||[]).map(b=>({id:String(b.id),evId:String(b.event_id),userId:String(b.user_id),userName:b.user_name||'',out:Number(b.chosen_outcome),amount:Number(b.bet_amount||0),status:b.result==='win'?'win':b.result==='loss'?'lose':'active',payout:Number(b.winnings||0)}));
+  bets.forEach(b=>{ const u=byId[b.userId]; if(u){u.betsCount++; if(b.status==='win')u.wins++;} });
+  const events=(eventsR.data||[]).map(e=>({id:String(e.id),title:e.title,desc:e.description||'',o1:e.outcome_1_name,o2:e.outcome_2_name,p1:Number(e.total_bets_outcome_1||0),p2:Number(e.total_bets_outcome_2||0),n1:0,n2:0,status:e.status==='closed'?'finished':'active',winner:e.winning_outcome?Number(e.winning_outcome):null,created_at:e.created_at,closes:e.created_at?new Date(e.created_at).getTime()+24*3600e3:Date.now()+24*3600e3}));
+  bets.forEach(b=>{const e=events.find(x=>x.id===b.evId); if(e){ if(b.out===1)e.n1++; else e.n2++; }});
+  store={v:1,users,weekends:(vacR.data||[]).map(v=>({id:String(v.id),date:v.day,userId:v.telegram_user_id?String(v.telegram_user_id):null,name:v.name})),diary:(diaryR.data||[]).map(d=>({id:String(d.id),text:d.text,ts:new Date(d.created_at).getTime(),created_at:d.created_at})),events,bets};
+}
+
+async function dbInsertVacation(key){
+  const payload={day:key,name:USER.name,telegram_user_id:USER.id};
+  const {data,error}=await sb.from('vacations').insert([payload]).select().single(); if(error) throw error;
+  return {id:String(data.id),date:data.day,userId:String(data.telegram_user_id),name:data.name};
+}
+async function dbDeleteVacation(id){ const {error}=await sb.from('vacations').delete().eq('id',id); if(error) throw error; }
+async function dbInsertDiary(text){ const {data,error}=await sb.from('diary_entries').insert([{text}]).select().single(); if(error) throw error; return {id:String(data.id),text:data.text,ts:new Date(data.created_at).getTime(),created_at:data.created_at}; }
+async function dbCreateEvent(t,desc,o1,o2){
+  const payload={title:t,description:desc,outcome_1_name:o1,outcome_2_name:o2,total_bets_outcome_1:0,total_bets_outcome_2:0,status:'open',created_by_user_id:USER.id,created_by_name:USER.name,created_at:new Date().toISOString()};
+  const {data,error}=await sb.from('bet_events').insert([payload]).select().single(); if(error) throw error;
+  try{ await fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-event',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+CONFIG.SUPABASE_ANON_KEY,'apikey':CONFIG.SUPABASE_ANON_KEY},body:JSON.stringify({title:t,creator_name:USER.name,description:desc||''})}); }catch(e){ console.warn('notify-event',e); }
+  return {id:String(data.id),title:data.title,desc:data.description||'',o1:data.outcome_1_name,o2:data.outcome_2_name,p1:0,p2:0,n1:0,n2:0,status:'active',winner:null,created_at:data.created_at,closes:new Date(data.created_at).getTime()+24*3600e3};
+}
+async function dbPlaceBet(ev,out,amount){
+  if(amount>Number(me().balance||0)) throw new Error('Недостаточно средств');
+  const newBalance=Math.floor(Number(me().balance)-amount);
+  const {error:be}=await sb.from('player_ratings').update({total_score:newBalance,updated_at:new Date().toISOString()}).eq('telegram_user_id',USER.id); if(be) throw be;
+  const payload={event_id:ev.id,user_id:USER.id,user_name:USER.name,bet_amount:amount,chosen_outcome:out,result:null,winnings:null,created_at:new Date().toISOString()};
+  const {data,error}=await sb.from('bet_placements').insert([payload]).select().single(); if(error){ await sb.from('player_ratings').update({total_score:me().balance,updated_at:new Date().toISOString()}).eq('telegram_user_id',USER.id); throw error; }
+  const next1=out===1?ev.p1+amount:ev.p1, next2=out===2?ev.p2+amount:ev.p2;
+  const {error:ee}=await sb.from('bet_events').update({total_bets_outcome_1:next1,total_bets_outcome_2:next2}).eq('id',ev.id); if(ee) throw ee;
+  return {id:String(data.id),evId:String(data.event_id),userId:String(data.user_id),out:Number(data.chosen_outcome),amount:Number(data.bet_amount),status:'active',payout:0};
+}
+async function addCommissionToUser(userId,userName,amount){
+  if(!sb || amount<=0) return;
+  const {data}=await sb.from('player_ratings').select('total_score').eq('telegram_user_id',userId).maybeSingle();
+  if(data) await sb.from('player_ratings').update({total_score:Number(data.total_score||0)+amount,updated_at:new Date().toISOString()}).eq('telegram_user_id',userId);
+  else await sb.from('player_ratings').insert([{telegram_user_id:userId,name:userName,total_score:amount,updated_at:new Date().toISOString()}]);
+}
+async function dbResolveEvent(ev,winOut){
+  const {data:bets,error}=await sb.from('bet_placements').select('*').eq('event_id',ev.id); if(error) throw error;
+  const list=bets||[], totalBets=ev.p1+ev.p2, winnerPool=winOut===1?ev.p1:ev.p2;
+  if(totalBets>0 && winnerPool>0){
+    const ca=Math.round(totalBets*CONFIG.ANATOLY_COMMISSION), cv=Math.round(totalBets*CONFIG.VNVV_COMMISSION), poolAfter=totalBets-ca-cv;
+    await addCommissionToUser(CONFIG.ANATOLY_ID,'Анатолий',ca); await addCommissionToUser(CONFIG.VNVV_ID,'vnvv',cv);
+    for(const b of list){
+      if(Number(b.chosen_outcome)===winOut){
+        const winnings=Math.round(poolAfter*(Number(b.bet_amount)/winnerPool));
+        await sb.from('bet_placements').update({result:'win',winnings}).eq('id',b.id);
+        const {data:pr}=await sb.from('player_ratings').select('total_score').eq('telegram_user_id',b.user_id).maybeSingle();
+        const newBal=Number(pr?.total_score||0)+winnings;
+        await sb.from('player_ratings').upsert({telegram_user_id:b.user_id,name:b.user_name||'Игрок',total_score:newBal,updated_at:new Date().toISOString()},{onConflict:'telegram_user_id'});
+      }else await sb.from('bet_placements').update({result:'loss',winnings:null}).eq('id',b.id);
+    }
+  }
+  const {error:ce}=await sb.from('bet_events').update({winning_outcome:winOut,status:'closed',closed_at:new Date().toISOString()}).eq('id',ev.id); if(ce) throw ce;
 }
 
 /* ---------- theme ---------- */
@@ -773,16 +825,24 @@ $('#dayActions').addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b) return;
   const act=b.dataset.act, key=state.selDate;
   if(act==='close'){ closeDay(); return; }
-  if(act==='sign'){
-    if(signupsFor(key).length>=CONFIG.MAX_SPOTS){ toast('Мест нет (макс. '+CONFIG.MAX_SPOTS+')','err'); haptic('error'); return; }
-    store.weekends.push({date:key,userId:USER.id}); save();
-    haptic('success'); toast('Вы записаны на выходной 🌤','ok');
-  }
-  if(act==='cancel'){
-    store.weekends=store.weekends.filter(w=>!(w.date===key&&w.userId===USER.id)); save();
-    haptic('light'); toast('Запись отменена','info');
-  }
-  renderDaySheet(); renderCalendar(); renderUpcoming(); renderMyDays();
+  (async()=>{
+    try{
+      if(act==='sign'){
+        if(signupsFor(key).length>=CONFIG.MAX_SPOTS){ toast('Мест нет (макс. '+CONFIG.MAX_SPOTS+')','err'); haptic('error'); return; }
+        if(DEMO){ store.weekends.push({date:key,userId:USER.id,name:USER.name}); save(); }
+        else { const row=await dbInsertVacation(key); store.weekends.push(row); }
+        haptic('success'); toast('Вы записаны на выходной 🌤','ok');
+      }
+      if(act==='cancel'){
+        const row=signupsFor(key).find(w=>String(w.userId)===String(USER.id));
+        if(!row) return;
+        if(DEMO){ store.weekends=store.weekends.filter(w=>!(w.date===key&&String(w.userId)===String(USER.id))); save(); }
+        else { await dbDeleteVacation(row.id); store.weekends=store.weekends.filter(w=>String(w.id)!==String(row.id)); }
+        haptic('light'); toast('Запись отменена','info');
+      }
+      renderDaySheet(); renderCalendar(); renderUpcoming(); renderMyDays();
+    }catch(e){ console.error(e); toast('Ошибка сохранения','err'); haptic('error'); }
+  })();
 });
 
 /* ================= DIARY (таблица/запросы сохранены; UI новый) ================= */
@@ -820,6 +880,7 @@ function renderGames(){
 }
 function buildGameUrl(g){
   const base=g.url;
+  if(g.external) return base;
   return base+(base.indexOf('?')>-1?'&':'?')+'uid='+encodeURIComponent(USER.id)+'&name='+encodeURIComponent(USER.name)+'&theme='+actualTheme();
 }
 function gamePlaceholder(g){
@@ -844,11 +905,12 @@ function openShell(title,sub,url,game){
   $('#gameShell').classList.add('on'); document.body.style.overflow='hidden';
   try{ if(tg&&tg.BackButton){ tg.BackButton.show(); } }catch(e){}
 }
-function closeShell(){
+async function closeShell(){
   const fr=$('#gameFrame'); fr.removeAttribute('srcdoc'); fr.src='about:blank';
   $('#gameShell').classList.remove('on'); document.body.style.overflow='';
   try{ if(tg&&tg.BackButton){ tg.BackButton.hide(); } }catch(e){}
-  /* после игры: обновление баланса и рейтинга (поведение сохранено) */
+  /* после игры: перечитываем существующие данные Supabase, затем обновляем UI */
+  try{ if(!DEMO && sb){ await loadStoreFromSupabase(); } }catch(e){ console.warn('post-game sync',e); }
   refreshBalance(); renderRating(); renderProfile(); renderBet();
 }
 function showLaunch(t){ $('#launchText').textContent=t; $('#launchOv').classList.add('on'); }
@@ -935,23 +997,17 @@ function openResolve(evId){
   $('#mrOuts').innerHTML=[1,2].map(k=>'<div class="out-row" data-win="'+k+'"><div class="out-top"><span>'+(k===1?' ':'')+ev['o'+k]+'</span></div></div>').join('');
   $('#mRes').classList.add('on'); $('#mBd').classList.add('on'); document.body.style.overflow='hidden';
 }
-function resolveEvent(evId,winOut){
-  const ev=getEv(evId);
-  const pot=ev.p1+ev.p2;
-  const fee=Math.round(pot*CONFIG.BET_FEE_RATE);           // комиссия сохранена
-  const poolAfterFee=pot-fee;
-  const winBets=store.bets.filter(b=>b.evId===evId&&b.status==='active'&&b.out===winOut);
-  store.bets.forEach(b=>{ if(b.evId===evId&&b.status==='active') b.status = b.out===winOut?'win':'lose'; });
-  const totWin=winBets.reduce((s,b)=>s+b.amount,0);
-  winBets.forEach(b=>{ const u=getUser(b.userId); if(u&&totWin>0){ b.payout=Math.floor(poolAfterFee*b.amount/totWin); u.balance+=b.payout; } });
-  const half=Math.floor(fee/2);                             // получатели: Анатолий и vnvv (сохранено)
-  const r0=getUser(CONFIG.FEE_RECIPIENTS[0]), r1=getUser(CONFIG.FEE_RECIPIENTS[1]);
-  if(r0) r0.balance+=half; if(r1) r1.balance+=fee-half;
-  ev.status='finished'; ev.winner=winOut; save();
-  const myWin=winBets.find(b=>b.userId===USER.id);
-  closeModals(); refreshBalance(); renderBet(); renderRating(); renderProfile();
-  haptic(myWin?'success':'light');
-  toast(myWin?'Событие закрыто. Выигрыш +'+fmt(myWin.payout)+' 💎':'Событие закрыто','ok');
+async function resolveEvent(evId,winOut){
+  const ev=getEv(evId); if(!ev||!isAdmin(USER)) return;
+  if(DEMO){
+    const pot=ev.p1+ev.p2, feeA=Math.round(pot*CONFIG.ANATOLY_COMMISSION), feeV=Math.round(pot*CONFIG.VNVV_COMMISSION), poolAfter=pot-feeA-feeV;
+    const wins=store.bets.filter(b=>b.evId===evId&&b.status==='active'&&b.out===winOut), winPool=winOut===1?ev.p1:ev.p2;
+    store.bets.forEach(b=>{if(b.evId===evId&&b.status==='active')b.status=b.out===winOut?'win':'lose';});
+    wins.forEach(b=>{const u=getUser(b.userId); if(u) b.payout=Math.round(poolAfter*b.amount/winPool),u.balance+=b.payout;});
+    const a=getUser(CONFIG.ANATOLY_ID),v=getUser(CONFIG.VNVV_ID); if(a)a.balance+=feeA;if(v)v.balance+=feeV;
+    ev.status='finished';ev.winner=winOut;save();
+  } else { await dbResolveEvent(ev,winOut); await loadStoreFromSupabase(); }
+  closeModals(); refreshBalance(); renderBet(); renderRating(); renderProfile(); haptic('success'); toast('Событие закрыто','ok');
 }
 
 /* ================= PROFILE ================= */
@@ -998,12 +1054,16 @@ $('#myDays').addEventListener('click',e=>{ const c=e.target.closest('[data-date]
 $('#dayBd').addEventListener('click',closeDay);
 
 $('#diaryText').addEventListener('input',e=>{ $('#diaryCount').textContent=e.target.value.length+'/500'; });
-$('#btnPost').addEventListener('click',()=>{
+$('#btnPost').addEventListener('click',async()=>{
   const t=$('#diaryText').value.trim();
   if(!t){ toast('Напишите что-нибудь — это анонимно 🎭','err'); haptic('error'); return; }
-  store.diary.push({id:'d'+Date.now(),text:t,ts:Date.now()}); save();
-  $('#diaryText').value=''; $('#diaryCount').textContent='0/500';
-  renderDiary(); haptic('success'); toast('Опубликовано анонимно','ok');
+  const btn=$('#btnPost'); btn.disabled=true;
+  try{
+    const entry=DEMO ? {id:'d'+Date.now(),text:t,ts:Date.now()} : await dbInsertDiary(t);
+    store.diary.push(entry); if(DEMO) save();
+    $('#diaryText').value=''; $('#diaryCount').textContent='0/500';
+    renderDiary(); haptic('success'); toast('Опубликовано анонимно','ok');
+  }catch(e){ console.error(e); toast('Ошибка сохранения','err'); haptic('error'); } finally{ btn.disabled=false; }
 });
 
 $('#gamesGrid').addEventListener('click',e=>{
@@ -1013,12 +1073,16 @@ $('#gamesGrid').addEventListener('click',e=>{
 
 $('#btnCreateEv').addEventListener('click',openCreate);
 $('#cCancel').addEventListener('click',closeModals);
-$('#cSubmit').addEventListener('click',()=>{
-  const t=$('#cTitle').value.trim(), o1=$('#cO1').value.trim()||'Исход 1', o2=$('#cO2').value.trim()||'Исход 2';
+$('#cSubmit').addEventListener('click',async()=>{
+  const t=$('#cTitle').value.trim(), desc=$('#cDesc').value.trim(), o1=$('#cO1').value.trim()||'Исход 1', o2=$('#cO2').value.trim()||'Исход 2';
   if(!t){ toast('Укажите название события','err'); haptic('error'); return; }
-  store.events.unshift({id:'ev'+Date.now(),title:t,desc:$('#cDesc').value.trim(),o1:o1,o2:o2,p1:0,p2:0,n1:0,n2:0,closes:Date.now()+24*3600e3,status:'active'});
-  save(); $('#cTitle').value='';$('#cDesc').value='';$('#cO1').value='';$('#cO2').value='';
-  closeModals(); renderBet(); haptic('success'); toast('Событие создано 🎯','ok');
+  const btn=$('#cSubmit'); btn.disabled=true;
+  try{
+    const ev=DEMO ? {id:'ev'+Date.now(),title:t,desc,o1,o2,p1:0,p2:0,n1:0,n2:0,closes:Date.now()+24*3600e3,status:'active'} : await dbCreateEvent(t,desc,o1,o2);
+    store.events.unshift(ev); if(DEMO) save();
+    $('#cTitle').value='';$('#cDesc').value='';$('#cO1').value='';$('#cO2').value='';
+    closeModals(); renderBet(); haptic('success'); toast('Событие создано 🎯','ok');
+  }catch(e){ console.error(e); toast('Ошибка создания','err'); haptic('error'); } finally{ btn.disabled=false; }
 });
 $('#evList').addEventListener('click',e=>{
   const bb=e.target.closest('[data-bet]'); if(bb){ openBetModal(bb.dataset.bet); return; }
@@ -1032,15 +1096,17 @@ $('#mbOuts').addEventListener('click',e=>{ const p=e.target.closest('[data-pick]
 $('#mbPresets').addEventListener('click',e=>{ const p=e.target.closest('[data-amt]'); if(p){ state.place.amount=+p.dataset.amt; renderBetModal(); haptic('light'); } });
 $('#mbAmount').addEventListener('input',e=>{ state.place.amount=Math.max(0,parseInt(e.target.value)||0); $$('.preset').forEach(x=>x.classList.toggle('on',+x.dataset.amt===state.place.amount)); });
 $('#mbCancel').addEventListener('click',closeModals);
-$('#mbSubmit').addEventListener('click',()=>{
+$('#mbSubmit').addEventListener('click',async()=>{
   const ev=getEv(state.place.evId), amt=state.place.amount;
   if(!amt||amt<1){ toast('Введите сумму ставки','err'); haptic('error'); return; }
   if(amt>myBalance()){ toast('Недостаточно средств 💎','err'); haptic('error'); return; }
-  const u=me(); u.balance-=amt; u.betsCount++;
-  ev['p'+state.place.out]+=amt; ev['n'+state.place.out]++;
-  store.bets.push({id:'b'+Date.now(),evId:ev.id,userId:USER.id,out:state.place.out,amount:amt,status:'active'});
-  save(); closeModals(); refreshBalance(); renderBet(); renderProfile();
-  haptic('success'); toast('Ставка принята: 💎 '+fmt(amt)+' на «'+ev['o'+state.place.out]+'»','ok');
+  const btn=$('#mbSubmit'); btn.disabled=true;
+  try{
+    if(DEMO){ const u=me(); u.balance-=amt; u.betsCount++; ev['p'+state.place.out]+=amt; ev['n'+state.place.out]++; store.bets.push({id:'b'+Date.now(),evId:ev.id,userId:USER.id,out:state.place.out,amount:amt,status:'active'}); save(); }
+    else { await dbPlaceBet(ev,state.place.out,amt); await loadStoreFromSupabase(); }
+    closeModals(); refreshBalance(); renderBet(); renderProfile();
+    haptic('success'); toast('Ставка принята: 💎 '+fmt(amt)+' на «'+ev['o'+state.place.out]+'»','ok');
+  }catch(e){ console.error(e); toast(e.message||'Ошибка ставки','err'); haptic('error'); } finally{ btn.disabled=false; }
 });
 $('#mrOuts').addEventListener('click',e=>{ const w=e.target.closest('[data-win]'); if(w){ resolveEvent(state.resEv,+w.dataset.win); } });
 $('#mrCancel').addEventListener('click',closeModals);
@@ -1053,14 +1119,24 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeDay(); close
 setInterval(()=>{ $$('.cd[data-ts]').forEach(el=>{ el.textContent=cdText(+el.dataset.ts); }); },1000);
 
 /* ================= init ================= */
-applyTheme();
-loadStore();
-$('#drUser').innerHTML=avatarHTML(me(),46)+'<div><div class="nm">'+USER.name+'</div><div class="sub">'+(USER.tgId?('ID '+USER.tgId):(USER.demo?'демо-режим':'Гость'))+'</div></div><span class="bl">💎 '+fmt(myBalance())+'</span>';
-$('#drNote').textContent=USER.demo?'Демо-режим · данные локальные':'Petzker · календарь для своих';
-$('#btnProfileAv').innerHTML=avatarHTML(me(),36,false);
-lastBal=myBalance(); $('#balVal').textContent=fmt(lastBal);
-skeletonFor('calendar'); loaded.calendar=true;
-setTimeout(()=>{ renderCalendarScreen(); refreshBalance(); },500);
+async function initApp(){
+  applyTheme();
+  try{
+    await loadStoreFromSupabase();
+  }catch(e){
+    console.error('Supabase load failed',e);
+    if(!DEMO){ toast('Не удалось загрузить данные Supabase','err'); store={v:1,users:[],weekends:[],diary:[],events:[],bets:[]}; }
+  }
+  if(!getUser(USER.id) && DEMO){ store.users.unshift({id:USER.id,name:USER.name,photo:USER.photo,hat:null,balance:10000,wins:0,betsCount:0}); save(); }
+  const u=me();
+  $('#drUser').innerHTML=avatarHTML(u,46)+'<div><div class="nm">'+escapeHTML(u.name)+'</div><div class="sub">'+(USER.tgId?('ID '+USER.tgId):'локальный просмотр')+'</div></div><span class="bl">💎 '+fmt(myBalance())+'</span>';
+  $('#drNote').textContent=DEMO?'Демо-режим · данные локальные':'Petzker · данные Supabase';
+  $('#btnProfileAv').innerHTML=avatarHTML(u,36,false);
+  lastBal=myBalance(); $('#balVal').textContent=fmt(lastBal);
+  skeletonFor('calendar'); loaded.calendar=true;
+  setTimeout(()=>{ renderCalendarScreen(); refreshBalance(); },250);
+}
+initApp();
 </script>
 </body>
 </html>
