@@ -115,24 +115,26 @@ img{display:block}
 .dr-note{margin-top:10px;text-align:center;font-size:11.5px;color:var(--muted)}
 
 /* calendar */
-.cal-card{padding:16px 14px 14px}
+.cal-card{padding:14px 10px 12px;overflow:hidden}
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-title{display:flex;flex-direction:column;align-items:center;gap:2px}
 .cal-title b{font-size:17px;font-weight:800}
-.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
 .cal-week span{text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em}
 .cal-week span.we{color:var(--gold)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.cal-cell{position:relative;height:52px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:1px solid transparent;transition:transform .12s,background .2s,border-color .2s}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-cell{position:relative;min-height:48px;aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:1px solid transparent;transition:transform .12s,background .2s,border-color .2s;padding:2px 1px}
 .cal-cell:active{transform:scale(.9)}
-.cal-cell .n{font-weight:700;font-size:14px;line-height:1}
+.cal-cell .n{font-weight:700;font-size:13px;line-height:1}
 .cal-cell.out{opacity:.3;pointer-events:none}
 .cal-cell.today{border-color:var(--gold-border);box-shadow:inset 0 0 0 1px var(--gold-border)}
 .cal-cell.today .n{color:var(--gold)}
 .cal-cell.full .n{color:var(--gold)}
-.cal-cell .mavs{display:flex;height:8px}
-.mav{width:9px;height:9px;border-radius:50%;background-size:cover;background-position:center;margin-left:-2px;border:1px solid var(--bg)}
-.mav:first-child{margin-left:0}
+.cal-cell .mavs{display:flex;align-items:center;justify-content:center;height:16px;max-width:100%;overflow:hidden}
+.cal-cell .mavs .av{width:15px!important;height:15px!important;font-size:15px!important;margin-left:-4px;border:1.5px solid var(--bg);box-shadow:none}
+.cal-cell .mavs .av:first-child{margin-left:0}
+.cal-cell .mavs .av-i{font-size:.55em}
+.cal-cell .mavs .av-p{border-radius:50%}
 .cal-cell.flash{animation:flash 1.4s ease}
 @keyframes flash{0%,100%{background:transparent}30%{background:var(--gold-soft);border-color:var(--gold-border);box-shadow:0 0 0 4px var(--gold-soft)}}
 .cal-legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11.5px;color:var(--muted);font-weight:600}
@@ -158,14 +160,17 @@ img{display:block}
 .empty .big{font-size:34px;display:block;margin-bottom:8px}
 
 /* avatars & hats */
-.av{position:relative;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.av-wrap{display:inline-flex;flex-direction:column;align-items:center;flex:none;line-height:0}
+.av{position:relative;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);overflow:hidden}
 .av-i{font-weight:800;color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.25);font-size:.42em;line-height:1}
 .av-p{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
-.hat{position:absolute;left:50%;top:-24%;transform:translateX(-50%) rotate(-7deg);width:108%;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));z-index:2}
-.hat svg,.hat img{width:100%;height:auto;display:block;object-fit:contain}
-.avstack{display:flex}
-.avstack .av{margin-left:-8px;border:2px solid var(--bg)}
-.avstack .av:first-child{margin-left:0}
+/* шляпа НАД аватаром, не на лице */
+.hat{position:relative;width:72%;height:auto;margin-bottom:-6%;z-index:2;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));flex-shrink:0;line-height:0}
+.hat img,.hat svg{width:100%;height:auto;display:block;object-fit:contain;object-position:center bottom}
+.avstack{display:flex;align-items:flex-end}
+.avstack .av-wrap{margin-left:-8px}
+.avstack .av-wrap:first-child{margin-left:0}
+.avstack .av{border:2px solid var(--bg)}
 
 /* diary */
 .composer{padding:16px}
@@ -294,7 +299,7 @@ textarea.f-in{min-height:70px;resize:vertical}
   .sheet{left:50%;top:50%;bottom:auto;right:auto;transform:translate(-50%,-50%) scale(.94);opacity:0;border-radius:26px;border-bottom:1px solid var(--stroke);width:min(470px,calc(100vw - 40px));max-height:min(720px,86dvh)}
   .sheet.on{transform:translate(-50%,-50%) scale(1);opacity:1}
   .app{max-width:700px}.topbar{width:min(700px,calc(100% - 20px))}
-  .cal-cell{height:60px}.games-grid{grid-template-columns:1fr 1fr 1fr}.g-card.feat{grid-column:1/-1}
+  .cal-cell{min-height:54px}.games-grid{grid-template-columns:1fr 1fr 1fr}.g-card.feat{grid-column:1/-1}
 }
 @media (hover:hover){
   .cal-cell:not(.out):hover{background:var(--surface-2)}
@@ -538,7 +543,7 @@ const GAMES = [
   {id:'miner', icon:'💣', name:'Минёр', desc:'Классика жанра: открывай клетки и не подорвись.', tag:'Классика', url:'https://wwwgolybfs-dev.github.io/global_obnova/minesweeper.html', feat:true},
   {id:'dice', icon:'🎲', name:'Кубики Удача', desc:'Два кубика, немного удачи — всё или ничего.', url:'https://wwwgolybfs-dev.github.io/global_obnova/dice.html'},
   {id:'doodle',icon:'🦘', name:'Дудл Прыжки', desc:'Прыгай по платформам и собирай очки.', url:'https://wwwgolybfs-dev.github.io/global_obnova/doodle.html'},
-  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'Домик собак — игровой слот.', tag:'3D / game', url:'https://wwwgolybfs-dev.github.io/dog_hause/index.html', external:true},
+  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'3D мир', tag:'3D / game', url:'https://messenger.abeto.co/', external:true},
   {id:'portal3',icon:'🍰', name:'Portal 3', desc:'Внешняя игра.', tag:'Внешняя', url:'https://p2.slqnt.dev/', external:true},
   {id:'soon1', icon:'🎯', name:'Скоро…', desc:'В разработке', soon:true},
   {id:'soon2', icon:'✨', name:'В разработке…', desc:'Скоро', soon:true}
@@ -585,10 +590,14 @@ function avatarHTML(u,size,withHat){
   if(withHat===undefined) withHat=true;
   if(!u) return '';
   const g=GRADS[hash(u.name)%GRADS.length];
-  const img=u.photo?'<img class="av-p" src="'+u.photo+'" alt="" onerror="this.style.display=\'none\'">':'';
-  return '<span class="av" style="width:'+size+'px;height:'+size+'px;font-size:'+size+'px;background:linear-gradient(135deg,'+g[0]+','+g[1]+')"><span class="av-i">'+initials(u.name)+'</span>'+img+(withHat?hatHTML(u.hat):'')+'</span>';
+  const img=u.photo?'<img class="av-p" src="'+u.photo+'" alt="" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">':'';
+  const face='<span class="av" style="width:'+size+'px;height:'+size+'px;font-size:'+size+'px;background:linear-gradient(135deg,'+g[0]+','+g[1]+')"><span class="av-i">'+initials(u.name)+'</span>'+img+'</span>';
+  if(withHat && u.hat){
+    return '<span class="av-wrap" style="width:'+size+'px">'+hatHTML(u.hat)+face+'</span>';
+  }
+  return face;
 }
-function mavHTML(u){ return avatarHTML(u,30,false); }
+function mavHTML(u){ return avatarHTML(u,15,false); }
 
 /* ---------- Supabase data layer: existing DB only, no schema changes ---------- */
 let store={v:1,users:[],weekends:[],diary:[],events:[],bets:[]}, sb=null;
