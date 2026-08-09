@@ -77,7 +77,7 @@ img{display:block}
 .bal-chip:active{transform:scale(.94)}
 .tb-av{border:0;background:none;padding:0;cursor:pointer;border-radius:50%}
 
-.app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:14px 10px calc(60px + env(safe-area-inset-bottom))}
+.app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:14px 8px calc(60px + env(safe-area-inset-bottom));width:100%;overflow-x:hidden}
 .screen{display:none}
 .screen.active{display:block;animation:scrIn .4s cubic-bezier(.25,.7,.3,1)}
 @keyframes scrIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -121,26 +121,26 @@ img{display:block}
 .dr-note{margin-top:10px;text-align:center;font-size:11.5px;color:var(--muted)}
 
 /* calendar */
-.cal-card{padding:14px 10px 12px;overflow:hidden}
+.cal-card{padding:12px 8px 10px;overflow:hidden;width:100%;box-sizing:border-box}
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-title{display:flex;flex-direction:column;align-items:center;gap:2px}
 .cal-title b{font-size:17px;font-weight:800}
-.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:6px}
 .cal-week span{text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em}
 .cal-week span.we{color:var(--gold)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-cell{position:relative;min-height:56px;aspect-ratio:1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:1.5px solid transparent;transition:transform .12s,background .2s,border-color .2s;padding:3px 2px;background:var(--surface-2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;width:100%}
+.cal-cell{position:relative;height:54px;min-width:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:1.5px solid transparent;transition:transform .12s,background .2s,border-color .2s;padding:2px 1px;background:var(--surface-2);box-sizing:border-box;overflow:hidden}
 .cal-cell:active{transform:scale(.9)}
-.cal-cell .n{font-weight:700;font-size:13px;line-height:1}
+.cal-cell .n{font-weight:700;font-size:12.5px;line-height:1}
 .cal-cell.out{opacity:.28;pointer-events:none;background:transparent;border-color:transparent}
 .cal-cell.s0{border-color:var(--day-free-border);background:var(--day-free-bg)}
 .cal-cell.s1{border-color:var(--day-one-border);background:var(--day-one-bg)}
 .cal-cell.s2{border-color:var(--day-full-border);background:var(--day-full-bg)}
-.cal-cell.today{box-shadow:0 0 0 2px var(--gold-border)}
+.cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--gold-border)}
 .cal-cell.today .n{color:var(--gold)}
 .cal-cell.s2 .n{color:var(--danger)}
-.cal-cell .mavs{display:flex;align-items:center;justify-content:center;height:22px;max-width:100%;overflow:visible}
-.cal-cell .mavs .av{width:20px!important;height:20px!important;font-size:20px!important;margin-left:-5px;border:1.5px solid var(--bg);box-shadow:none;flex:none}
+.cal-cell .mavs{display:flex;align-items:center;justify-content:center;height:20px;width:100%;max-width:100%;overflow:hidden}
+.cal-cell .mavs .av{width:18px!important;height:18px!important;font-size:18px!important;margin-left:-4px;border:1.5px solid var(--bg);box-shadow:none;flex:none}
 .cal-cell .mavs .av:first-child{margin-left:0}
 .cal-cell .mavs .av-i{font-size:.5em}
 .cal-cell .mavs .av-p{border-radius:50%}
@@ -315,7 +315,7 @@ textarea.f-in{min-height:70px;resize:vertical}
   .sheet{left:50%;top:50%;bottom:auto;right:auto;transform:translate(-50%,-50%) scale(.94);opacity:0;border-radius:26px;border-bottom:1px solid var(--stroke);width:min(470px,calc(100vw - 40px));max-height:min(720px,86dvh)}
   .sheet.on{transform:translate(-50%,-50%) scale(1);opacity:1}
   .app{max-width:700px}.topbar{width:min(700px,calc(100% - 20px))}
-  .cal-cell{min-height:62px}.games-grid{grid-template-columns:1fr 1fr 1fr}.g-card.feat{grid-column:1/-1}
+  .cal-cell{height:58px}.games-grid{grid-template-columns:1fr 1fr 1fr}.g-card.feat{grid-column:1/-1}
 }
 @media (hover:hover){
   .cal-cell:not(.out):hover{background:var(--surface-2)}
@@ -461,6 +461,8 @@ textarea.f-in{min-height:70px;resize:vertical}
     <div class="stats-grid" id="statsGrid"></div>
     <span class="row-label">Мои выходные</span>
     <div class="chips" id="profDays"></div>
+    <span class="row-label">Общий рейтинг</span>
+    <div class="rate-list glass" id="profRateList"></div>
     <span class="row-label">Мои ставки</span>
     <div id="profBets"></div>
   </section>
@@ -613,7 +615,11 @@ function avatarHTML(u,size,withHat){
   }
   return face;
 }
-function mavHTML(u){ return avatarHTML(u,20,false); }
+function mavHTML(w){
+  if(!w) return '';
+  const u = (w.userId!=null && getUser(w.userId)) || {id:String(w.userId||w.id||''), name:w.name||'?', photo:null, hat:null};
+  return avatarHTML(u,18,false);
+}
 
 /* ---------- Supabase data layer: existing DB only, no schema changes ---------- */
 let store={v:1,users:[],weekends:[],diary:[],events:[],bets:[]}, sb=null;
@@ -777,7 +783,7 @@ function skeletonFor(id){
   if(id==='games'){ $('#gamesGrid').innerHTML='<div class="sk" style="height:150px;border-radius:20px;grid-column:1/-1"></div>'+'<div class="sk" style="height:150px;border-radius:20px"></div>'.repeat(4); }
   if(id==='rating'){ $('#podium').innerHTML='<div class="sk" style="height:150px;grid-column:1/-1"></div>'; $('#rateList').innerHTML='<div class="sk" style="height:52px;margin:8px"></div>'.repeat(3); }
   if(id==='bet'){ $('#evList').innerHTML='<div class="sk" style="height:180px;border-radius:22px;margin-bottom:12px"></div>'.repeat(2); }
-  if(id==='profile'){ $('#statsGrid').innerHTML='<div class="sk" style="height:70px"></div>'.repeat(4); }
+  if(id==='profile'){ $('#statsGrid').innerHTML='<div class="sk" style="height:70px"></div>'.repeat(4); const pr=$('#profRateList'); if(pr) pr.innerHTML='<div class="sk" style="height:52px;margin:8px"></div>'.repeat(3); }
 }
 
 /* ================= CALENDAR (логика дат/мест сохранена) ================= */
@@ -1038,12 +1044,12 @@ async function resolveEvent(evId,winOut){
 
 /* ================= PROFILE ================= */
 function renderProfile(){
-  const u=me(), rank=sortedUsers().findIndex(x=>x.id===USER.id)+1;
+  const u=me(), list=sortedUsers(), rank=list.findIndex(x=>x.id===USER.id)+1;
   $('#profAv').innerHTML=avatarHTML(u,92);
   $('#profName').textContent=u.name;
   $('#profId').textContent=USER.tgId?('Telegram ID: '+USER.tgId):(USER.demo?'демо-профиль':'Telegram не определён');
   $('#profBal').innerHTML='💎 '+fmt(u.balance);
-  $('#profRank').innerHTML='🏆 #'+rank+' в рейтинге';
+  $('#profRank').innerHTML='🏆 #'+(rank||'—')+' в рейтинге';
   const myDays=store.weekends.filter(w=>w.userId===USER.id).length;
   $('#statsGrid').innerHTML=
     '<div class="stat glass"><b>'+fmt(u.balance)+'</b><span>очков</span></div>'+
@@ -1051,6 +1057,15 @@ function renderProfile(){
     '<div class="stat glass"><b>'+u.betsCount+'</b><span>ставок</span></div>'+
     '<div class="stat glass"><b>'+myDays+'</b><span>выходных</span></div>';
   renderMyDays();
+  const box=$('#profRateList');
+  if(box){
+    if(!list.length){ box.innerHTML='<div class="empty" style="padding:12px">Нет данных рейтинга</div>'; }
+    else {
+      box.innerHTML=list.slice(0,20).map((x,i)=>
+        '<div class="r-row'+(x.id===USER.id?' me':'')+'"><span class="r-rank">'+(i+1)+'</span>'+avatarHTML(x,36)+'<span class="r-name">'+escapeHTML(x.name)+(x.id===USER.id?' · вы':'')+'</span><span class="r-pts">'+fmt(x.balance)+'</span></div>'
+      ).join('');
+    }
+  }
 }
 
 /* ================= bindings ================= */
