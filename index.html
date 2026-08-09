@@ -368,7 +368,7 @@ textarea.f-in{min-height:70px;resize:vertical}
 <aside class="drawer" id="drawer">
   <div class="dr-head">
     <span class="logo-tile">P</span>
-    <div><b class="dr-brand">Petzker</b><span class="dr-ver">beta 7.41E</span></div>
+    <div><b class="dr-brand">Petzker</b><span class="dr-ver">Умри но не сегодня</span></div>
   </div>
   <div class="dr-user glass" id="drUser"></div>
   <nav>
@@ -378,7 +378,6 @@ textarea.f-in{min-height:70px;resize:vertical}
     <button class="dr-item" data-nav="profile"><span class="ic">👤</span>Профиль</button>
     <div class="dr-group">Игры</div>
     <button class="dr-item" data-nav="games"><span class="ic">🎮</span>Игры</button>
-    <button class="dr-item" data-nav="rating"><span class="ic">🏆</span>Рейтинг</button>
     <div class="dr-group">Ставки</div>
     <button class="dr-item" data-nav="bet"><span class="ic">🎯</span>Petzker Bet</button>
     <div class="dr-group">Развлечения</div>
@@ -416,9 +415,9 @@ textarea.f-in{min-height:70px;resize:vertical}
   <!-- ДНЕВНИК -->
   <section class="screen" id="sc-diary">
     <div class="composer glass">
-      <div class="composer-top"><span class="anon-badge">🎭 анонимно</span></div>
+      <div class="composer-top"><span class="anon-badge">🎭 скрытая дрочка</span></div>
       <div class="composer-label">Что сегодня произошло?</div>
-      <textarea id="diaryText" placeholder="Напишите анонимно…" maxlength="500"></textarea>
+      <textarea id="diaryText" placeholder="Напишите кто где соснул хуйца…" maxlength="500"></textarea>
       <div class="composer-foot"><span id="diaryCount">0/500</span><button class="btn btn-gold btn-sm" id="btnPost">Опубликовать</button></div>
     </div>
     <div id="diaryFeed"></div>
@@ -429,11 +428,6 @@ textarea.f-in{min-height:70px;resize:vertical}
     <div class="games-grid" id="gamesGrid"></div>
   </section>
 
-  <!-- РЕЙТИНГ -->
-  <section class="screen" id="sc-rating">
-    <div class="podium glass" id="podium"></div>
-    <div class="rate-list glass" id="rateList"></div>
-  </section>
 
   <!-- PETZKER BET -->
   <section class="screen" id="sc-bet">
@@ -558,11 +552,11 @@ function isAdmin(u){ return !!u && String(u.id) === String(CONFIG.ANATOLY_ID); }
 function isCommissionAdmin(u){ return !!u && (String(u.id)===String(CONFIG.ANATOLY_ID) || String(u.id)===String(CONFIG.VNVV_ID)); }
 
 const GAMES = [
-  {id:'miner', icon:'💣', name:'Минёр', desc:'Классика жанра: открывай клетки и не подорвись.', tag:'Классика', url:'https://wwwgolybfs-dev.github.io/global_obnova/minesweeper.html', feat:true},
-  {id:'dice', icon:'🎲', name:'Кубики Удача', desc:'Два кубика, немного удачи — всё или ничего.', url:'https://wwwgolybfs-dev.github.io/global_obnova/dice.html'},
-  {id:'doodle',icon:'🦘', name:'Дудл Прыжки', desc:'Прыгай по платформам и собирай очки.', url:'https://wwwgolybfs-dev.github.io/global_obnova/doodle.html'},
-  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'3D мир', tag:'3D / game', url:'https://messenger.abeto.co/', external:true},
-  {id:'portal3',icon:'🍰', name:'Portal 3', desc:'Внешняя игра.', tag:'Внешняя', url:'https://p2.slqnt.dev/', external:true},
+  {id:'miner', icon:'💣', name:'Минёр', desc:'открывай клетки и не подорвись.', tag:'Классика', url:'https://wwwgolybfs-dev.github.io/global_obnova/minesweeper.html', feat:true},
+  {id:'dice', icon:'🎲', name:'Кубики ', desc:'любимая игра бабушек', url:'https://wwwgolybfs-dev.github.io/global_obnova/dice.html'},
+  {id:'doodle',icon:'🦘', name:'Дудл Хуанг', desc:'Прыгай по платформам и собирай очки.', url:'https://wwwgolybfs-dev.github.io/global_obnova/doodle.html'},
+  {id:'walker',icon:'👑', name:'Гулялка-бродилка', desc:'3D ', tag:'3D ', url:'https://messenger.abeto.co/', external:true},
+  {id:'portal3',icon:'🍰', name:'Portal 3', desc:'Внешняя игра.', tag:'спиздил', url:'https://p2.slqnt.dev/', external:true},
   {id:'soon1', icon:'🎯', name:'Скоро…', desc:'В разработке', soon:true},
   {id:'soon2', icon:'✨', name:'В разработке…', desc:'Скоро', soon:true}
 ];
@@ -766,8 +760,8 @@ function openDrawer(){ $('#drawer').classList.add('on'); $('#drawerBd').classLis
 function closeDrawer(){ $('#drawer').classList.remove('on'); $('#drawerBd').classList.remove('on'); document.body.style.overflow=''; }
 
 /* ---------- screens ---------- */
-const TITLES={calendar:'Выходные',diary:'Дневник',games:'Игры',rating:'Рейтинг',bet:'Petzker Bet',profile:'Профиль'};
-const RENDER={calendar:renderCalendarScreen,diary:renderDiary,games:renderGames,rating:renderRating,bet:renderBet,profile:renderProfile};
+const TITLES={calendar:'Выходные',diary:'Дневник',games:'Игры',bet:'Petzker Bet',profile:'Профиль'};
+const RENDER={calendar:renderCalendarScreen,diary:renderDiary,games:renderGames,bet:renderBet,profile:renderProfile};
 function showScreen(id){
   state.screen=id;
   $$('.screen').forEach(s=>s.classList.toggle('active', s.id==='sc-'+id));
@@ -781,7 +775,6 @@ function skeletonFor(id){
   if(id==='calendar'){ $('#calGrid').innerHTML=Array(35).fill('<div class="sk" style="height:52px;border-radius:14px"></div>').join(''); $('#upList').innerHTML='<div class="sk" style="height:64px;border-radius:20px"></div>'.repeat(2); }
   if(id==='diary'){ $('#diaryFeed').innerHTML='<div class="sk" style="height:86px;border-radius:20px;margin-bottom:10px"></div>'.repeat(3); }
   if(id==='games'){ $('#gamesGrid').innerHTML='<div class="sk" style="height:150px;border-radius:20px;grid-column:1/-1"></div>'+'<div class="sk" style="height:150px;border-radius:20px"></div>'.repeat(4); }
-  if(id==='rating'){ $('#podium').innerHTML='<div class="sk" style="height:150px;grid-column:1/-1"></div>'; $('#rateList').innerHTML='<div class="sk" style="height:52px;margin:8px"></div>'.repeat(3); }
   if(id==='bet'){ $('#evList').innerHTML='<div class="sk" style="height:180px;border-radius:22px;margin-bottom:12px"></div>'.repeat(2); }
   if(id==='profile'){ $('#statsGrid').innerHTML='<div class="sk" style="height:70px"></div>'.repeat(4); const pr=$('#profRateList'); if(pr) pr.innerHTML='<div class="sk" style="height:52px;margin:8px"></div>'.repeat(3); }
 }
@@ -951,17 +944,17 @@ function hideLaunch(){ $('#launchOv').classList.remove('on'); }
 /* ================= RATING (формула сохранена; отображение новое) ================= */
 function sortedUsers(){ return store.users.slice().sort((a,b)=>b.balance-a.balance); }
 function renderRating(){
-  const list=sortedUsers();
-  if(!list.length){ $('#podium').innerHTML=''; $('#rateList').innerHTML='<div class="empty">Нет данных рейтинга</div>'; return; }
-  const top=list.slice(0,3);
-  const order=[top[1],top[0],top[2]], cls=['p2','p1','p3'], med=['🥈','🥇','🥉'], sz=[52,64,48];
-  $('#podium').innerHTML=order.map((u,i)=>{
-    if(!u) return '<div class="pod '+cls[i]+'"><span class="medal">'+med[i]+'</span><div class="pod-av"></div><span class="nm">—</span><span class="pts"> </span><div class="bar">'+(i===1?'1':i===0?'2':'3')+'</div></div>';
-    return '<div class="pod '+cls[i]+'"><span class="medal">'+med[i]+'</span><div class="pod-av">'+avatarHTML(u,sz[i])+'</div><span class="nm">'+escapeHTML(u.name)+'</span><span class="pts">💎 '+fmt(u.balance)+'</span><div class="bar">'+(i===1?'1':i===0?'2':'3')+'</div></div>';
-  }).join('');
-  $('#rateList').innerHTML=list.slice(3).map((u,i)=>
-    '<div class="r-row'+(u.id===USER.id?' me':'')+'"><span class="r-rank">'+(i+4)+'</span>'+avatarHTML(u,38)+'<span class="r-name">'+u.name+(u.id===USER.id?' · вы':'')+'</span><span class="r-pts">'+fmt(u.balance)+'</span></div>'
-  ).join('') || '';
+  /* рейтинг только в профиле */
+  if(state.screen==='profile') renderProfile();
+  else {
+    const box=$('#profRateList');
+    if(!box) return;
+    const list=sortedUsers();
+    if(!list.length){ box.innerHTML='<div class="empty" style="padding:12px">Нет данных рейтинга</div>'; return; }
+    box.innerHTML=list.slice(0,20).map((x,i)=>
+      '<div class="r-row'+(x.id===USER.id?' me':'')+'"><span class="r-rank">'+(i+1)+'</span>'+avatarHTML(x,36)+'<span class="r-name">'+escapeHTML(x.name)+(x.id===USER.id?' · вы':'')+'</span><span class="r-pts">'+fmt(x.balance)+'</span></div>'
+    ).join('');
+  }
 }
 
 /* ================= PETZKER BET (таблицы/комиссии/права сохранены) ================= */
@@ -1097,13 +1090,13 @@ $('#dayBd').addEventListener('click',closeDay);
 $('#diaryText').addEventListener('input',e=>{ $('#diaryCount').textContent=e.target.value.length+'/500'; });
 $('#btnPost').addEventListener('click',async()=>{
   const t=$('#diaryText').value.trim();
-  if(!t){ toast('Напишите что-нибудь — это анонимно 🎭','err'); haptic('error'); return; }
+  if(!t){ toast('Напишите что-нибудь','err'); haptic('error'); return; }
   const btn=$('#btnPost'); btn.disabled=true;
   try{
     const entry=DEMO ? {id:'d'+Date.now(),text:t,ts:Date.now()} : await dbInsertDiary(t);
     store.diary.push(entry); if(DEMO) save();
     $('#diaryText').value=''; $('#diaryCount').textContent='0/500';
-    renderDiary(); haptic('success'); toast('Опубликовано анонимно','ok');
+    renderDiary(); haptic('success'); toast('Опубликовано ','ok');
   }catch(e){ console.error(e); toast('Ошибка сохранения','err'); haptic('error'); } finally{ btn.disabled=false; }
 });
 
@@ -1171,7 +1164,7 @@ async function initApp(){
   if(!getUser(USER.id) && DEMO){ store.users.unshift({id:USER.id,name:USER.name,photo:USER.photo,hat:null,balance:10000,wins:0,betsCount:0}); save(); }
   const u=me();
   $('#drUser').innerHTML=avatarHTML(u,46)+'<div><div class="nm">'+escapeHTML(u.name)+'</div><div class="sub">'+(USER.tgId?('ID '+USER.tgId):'локальный просмотр')+'</div></div><span class="bl">💎 '+fmt(myBalance())+'</span>';
-  $('#drNote').textContent=DEMO?'Демо-режим · данные локальные':'Petzker · данные Supabase';
+  $('#drNote').textContent=DEMO?'Демо-режим · данные локальные':'beta 7.41E';
   $('#btnProfileAv').innerHTML=avatarHTML(u,36,false);
   lastBal=myBalance(); $('#balVal').textContent=fmt(lastBal);
   skeletonFor('calendar'); loaded.calendar=true;
